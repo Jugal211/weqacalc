@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../screens/investment_calculator/sip_calc.dart';
 import '../screens/investment_calculator/cagr_calc.dart';
+import '../screens/investment_calculator/simple_interest_calc.dart';
 import '../screens/investment_calculator/compound_interest_calc.dart';
+import '../screens/investment_calculator/fd_calc.dart';
+import '../screens/investment_calculator/rd_calc.dart';
 // import '../screens/loans.dart';
 
 Widget buildCalculatorGrid(BuildContext context) {
@@ -24,27 +27,60 @@ Widget buildCalculatorGrid(BuildContext context) {
     ),
     CalculatorItem(
       icon: Icons.percent,
+      title: 'Simple Interest Calculator',
+      subtitle: 'Simple Interest Calculator',
+      color: Colors.teal.shade400,
+      gradient: [Colors.teal.shade400, Colors.teal.shade600],
+      route: const SimpleInterestCalculator(),
+    ),
+    CalculatorItem(
+      icon: Icons.percent,
       title: 'Compound Interest Calculator',
-      subtitle: 'Compound Interest Calculator',
+      subtitle: 'Lumpsum Investments',
       color: Colors.indigo.shade400,
       gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
       route: const CompoundInterestCalculator(),
     ),
-    // CalculatorItem(
-    //   icon: Icons.account_balance,
-    //   title: 'FD Calculator',
-    //   subtitle: 'Fixed Deposit',
-    //   color: Colors.teal.shade400,
-    //   gradient: [Colors.teal.shade400, Colors.teal.shade600],
-    // ),
-    // CalculatorItem(
-    //   icon: Icons.security,
-    //   title: 'Retirement',
-    //   subtitle: 'Plan Ahead',
-    //   color: Colors.indigo.shade400,
-    //   gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
-    //   route: const SIPCalculatorApp(),
-    // ),
+    CalculatorItem(
+      icon: Icons.savings,
+      title: 'FD Calculator',
+      subtitle: 'Fixed Deposit',
+      color: Colors.green.shade400,
+      gradient: [Colors.green.shade400, Colors.green.shade600],
+      route: const FDCalculator(),
+    ),
+    CalculatorItem(
+      icon: Icons.savings,
+      title: 'RD Calculator',
+      subtitle: 'Recurring Deposit',
+      color: Colors.brown.shade400,
+      gradient: [Colors.brown.shade400, Colors.brown.shade600],
+      route: const RDCalculator(),
+    ),
+    CalculatorItem(
+      icon: Icons.assured_workload,
+      title: 'PPF Calculator',
+      subtitle: 'Public Provident Fund',
+      color: Colors.indigo.shade400,
+      gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
+      route: const FDCalculator(),
+    ),
+    CalculatorItem(
+      icon: Icons.business,
+      title: 'EPF Calculator',
+      subtitle: 'Employee Provident Fund',
+      color: Colors.lime.shade400,
+      gradient: [Colors.lime.shade400, Colors.lime.shade600],
+      route: const FDCalculator(),
+    ),
+    CalculatorItem(
+      icon: Icons.face_3,
+      title: 'SSY Calculator',
+      subtitle: 'Sukanya Samriddhi Yojana',
+      color: Colors.teal.shade400,
+      gradient: [Colors.teal.shade400, Colors.teal.shade600],
+      route: const FDCalculator(),
+    ),
     // CalculatorItem(
     //   icon: Icons.currency_exchange,
     //   title: 'Currency',
@@ -90,7 +126,7 @@ Widget _buildCalculatorCard(BuildContext context, CalculatorItem item) {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

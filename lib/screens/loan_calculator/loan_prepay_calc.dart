@@ -285,7 +285,7 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -601,10 +601,10 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 2),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -667,7 +667,7 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withOpacity(0.3),
+            color: Colors.purple.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -696,7 +696,7 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
               Container(
                 width: 1,
                 height: 60,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
               ),
               Expanded(
                 child: _buildSavingItem(
@@ -745,7 +745,7 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),

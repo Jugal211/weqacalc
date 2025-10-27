@@ -11,76 +11,115 @@ import 'dart:math';
 //   @override
 //   Widget build(BuildContext context) {
 //     return MaterialApp(
-//       title: 'Simple Interest Calculator',
+//       title: 'FD Calculator',
 //       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(primarySwatch: Colors.deepPurple, useMaterial3: true),
-//       home: const SimpleInterestCalculator(),
+//       theme: ThemeData(
+//         primarySwatch: Colors.cyan,
+//         useMaterial3: true,
+//       ),
+//       home: const FDCalculator(),
 //     );
 //   }
 // }
 
-class SimpleInterestCalculator extends StatefulWidget {
-  const SimpleInterestCalculator({super.key});
+class FDCalculator extends StatefulWidget {
+  const FDCalculator({super.key});
 
   @override
-  State<SimpleInterestCalculator> createState() =>
-      _SimpleInterestCalculatorState();
+  State<FDCalculator> createState() => _FDCalculatorState();
 }
 
-class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
-  final _principalController = TextEditingController();
+class _FDCalculatorState extends State<FDCalculator> {
+  final _investmentController = TextEditingController();
   final _rateController = TextEditingController();
-  final _timeController = TextEditingController();
+  final _tenureController = TextEditingController();
 
-  double _principal = 100000;
-  double _rate = 8;
-  double _time = 5;
+  double _investment = 100000;
+  double _rate = 7;
+  double _tenure = 5;
+  String _compoundingFrequency = 'Yearly';
 
-  double _simpleInterest = 0;
-  double _totalAmount = 0;
+  double _maturityAmount = 0;
+  double _totalInterest = 0;
+
+  final List<Map<String, dynamic>> _frequencies = [
+    {'label': 'Monthly', 'value': 12, 'description': 'Highest Returns'},
+    {'label': 'Quarterly', 'value': 4, 'description': 'Higher Returns'},
+    {'label': 'Half-Yearly', 'value': 2, 'description': 'Twice per year'},
+    {'label': 'Yearly', 'value': 1, 'description': 'Most Common'},
+  ];
 
   @override
   void initState() {
     super.initState();
-    _principalController.text = _principal.toStringAsFixed(0);
+    _investmentController.text = _investment.toStringAsFixed(0);
     _rateController.text = _rate.toStringAsFixed(1);
-    _timeController.text = _time.toStringAsFixed(1);
+    _tenureController.text = _tenure.toStringAsFixed(1);
     _calculate();
   }
 
   void _calculate() {
-    // Simple Interest Formula: SI = (P × R × T) / 100
-    _simpleInterest = (_principal * _rate * _time) / 100;
-    _totalAmount = _principal + _simpleInterest;
+    // FD uses Compound Interest: A = P(1 + r/n)^(nt)
+    int n = _frequencies.firstWhere(
+      (f) => f['label'] == _compoundingFrequency,
+    )['value'];
+    double r = _rate / 100;
+    double t = _tenure;
+
+    _maturityAmount = _investment * pow(1 + r / n, n * t);
+    _totalInterest = _maturityAmount - _investment;
 
     setState(() {});
   }
 
   List<Map<String, dynamic>> _getYearlyBreakdown() {
     List<Map<String, dynamic>> breakdown = [];
-    double yearlyInterest = (_principal * _rate) / 100;
+    int n = _frequencies.firstWhere(
+      (f) => f['label'] == _compoundingFrequency,
+    )['value'];
+    double r = _rate / 100;
 
-    for (int year = 0; year <= _time.ceil(); year++) {
-      double totalInterest = yearlyInterest * year;
-      double totalAmount = _principal + totalInterest;
+    for (int year = 0; year <= _tenure.ceil(); year++) {
+      double amount = _investment * pow(1 + r / n, n * year);
+      double interest = amount - _investment;
+      double yearlyInterest = 0;
+
+      if (year > 0) {
+        double prevAmount = _investment * pow(1 + r / n, n * (year - 1));
+        yearlyInterest = amount - prevAmount;
+      }
 
       breakdown.add({
         'year': year,
-        'yearlyInterest': year > 0 ? yearlyInterest : 0,
-        'totalInterest': totalInterest,
-        'totalAmount': totalAmount,
+        'amount': amount,
+        'totalInterest': interest,
+        'yearlyInterest': yearlyInterest,
       });
     }
 
     return breakdown;
   }
 
+  Map<String, double> _compareFrequencies() {
+    Map<String, double> comparison = {};
+    double r = _rate / 100;
+    double t = _tenure;
+
+    for (var freq in _frequencies) {
+      int n = freq['value'];
+      double amount = _investment * pow(1 + r / n, n * t);
+      comparison[freq['label']] = amount;
+    }
+
+    return comparison;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Simple Interest Calculator'),
-        backgroundColor: Colors.deepPurple.shade600,
+        title: const Text('FD Calculator'),
+        backgroundColor: Colors.cyan.shade600,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -95,13 +134,17 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                 children: [
                   _buildInputCard(),
                   const SizedBox(height: 20),
+                  _buildFrequencySelector(),
+                  const SizedBox(height: 20),
                   _buildResultCards(),
                   const SizedBox(height: 20),
                   _buildBreakdownChart(),
                   const SizedBox(height: 20),
+                  _buildFrequencyComparison(),
+                  const SizedBox(height: 20),
                   _buildYearlyBreakdown(),
                   const SizedBox(height: 20),
-                  _buildFormulaCard(),
+                  _buildInfoCard(),
                 ],
               ),
             ),
@@ -117,21 +160,17 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.deepPurple.shade600, Colors.deepPurple.shade400],
+          colors: [Colors.cyan.shade600, Colors.cyan.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.monetization_on_rounded,
-            size: 70,
-            color: Colors.white,
-          ),
+          const Icon(Icons.account_balance, size: 70, color: Colors.white),
           const SizedBox(height: 20),
           const Text(
-            'Simple Interest',
+            'Maturity Amount',
             style: TextStyle(
               color: Colors.white70,
               fontSize: 18,
@@ -140,7 +179,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
           ),
           const SizedBox(height: 8),
           Text(
-            '₹${_simpleInterest.toStringAsFixed(0)}',
+            '₹${_maturityAmount.toStringAsFixed(0)}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 48,
@@ -150,7 +189,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
           ),
           const SizedBox(height: 8),
           Text(
-            'over ${_time.toStringAsFixed(1)} years',
+            'after ${_tenure.toStringAsFixed(1)} years',
             style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
         ],
@@ -176,22 +215,22 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Loan Details',
+            'FD Details',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Principal Amount',
-            value: _principal,
+            label: 'Total Investment',
+            value: _investment,
             min: 1000,
             max: 10000000,
             divisions: 1000,
             prefix: '₹',
-            controller: _principalController,
+            controller: _investmentController,
             onChanged: (val) {
               setState(() {
-                _principal = val;
-                _principalController.text = val.toStringAsFixed(0);
+                _investment = val;
+                _investmentController.text = val.toStringAsFixed(0);
                 _calculate();
               });
             },
@@ -201,8 +240,8 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
             label: 'Rate of Interest (% p.a.)',
             value: _rate,
             min: 1,
-            max: 30,
-            divisions: 290,
+            max: 15,
+            divisions: 140,
             suffix: '%',
             controller: _rateController,
             onChanged: (val) {
@@ -215,17 +254,17 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Time Period',
-            value: _time,
-            min: 0.5,
-            max: 50,
-            divisions: 99,
+            label: 'Time Period (Tenure)',
+            value: _tenure,
+            min: 0.25,
+            max: 10,
+            divisions: 39,
             suffix: ' Years',
-            controller: _timeController,
+            controller: _tenureController,
             onChanged: (val) {
               setState(() {
-                _time = val;
-                _timeController.text = val.toStringAsFixed(1);
+                _tenure = val;
+                _tenureController.text = val.toStringAsFixed(1);
                 _calculate();
               });
             },
@@ -283,12 +322,9 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple.shade50,
+                  color: Colors.cyan.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.deepPurple.shade200,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: Colors.cyan.shade200, width: 1.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -297,16 +333,12 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                       '$prefix${value.toStringAsFixed(suffix == '%' || suffix.contains('Year') ? 1 : 0)}$suffix',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.deepPurple.shade700,
+                        color: Colors.cyan.shade700,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: Colors.deepPurple.shade700,
-                    ),
+                    Icon(Icons.edit, size: 16, color: Colors.cyan.shade700),
                   ],
                 ),
               ),
@@ -316,10 +348,10 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
         const SizedBox(height: 12),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: Colors.deepPurple.shade600,
-            inactiveTrackColor: Colors.deepPurple.shade100,
-            thumbColor: Colors.deepPurple.shade700,
-            overlayColor: Colors.deepPurple.shade100,
+            activeTrackColor: Colors.cyan.shade600,
+            inactiveTrackColor: Colors.cyan.shade100,
+            thumbColor: Colors.cyan.shade700,
+            overlayColor: Colors.cyan.shade100,
             trackHeight: 6,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
           ),
@@ -366,10 +398,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.deepPurple.shade600,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: Colors.cyan.shade600, width: 2),
             ),
             hintText: 'Enter value',
           ),
@@ -400,10 +429,99 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple.shade600,
+              backgroundColor: Colors.cyan.shade600,
               foregroundColor: Colors.white,
             ),
             child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFrequencySelector() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Interest Compounding',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'How often interest is compounded',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _frequencies.map((freq) {
+              bool isSelected = _compoundingFrequency == freq['label'];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _compoundingFrequency = freq['label'];
+                    _calculate();
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.cyan.shade600
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.cyan.shade600
+                          : Colors.grey.shade300,
+                      width: 2,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        freq['label'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.grey.shade800,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        freq['description'],
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isSelected
+                              ? Colors.white70
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -415,8 +533,8 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
       children: [
         Expanded(
           child: _buildResultCard(
-            'Principal',
-            _principal,
+            'Invested',
+            _investment,
             Icons.account_balance_wallet_rounded,
             Colors.blue,
           ),
@@ -425,7 +543,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
         Expanded(
           child: _buildResultCard(
             'Interest',
-            _simpleInterest,
+            _totalInterest,
             Icons.trending_up_rounded,
             Colors.green,
           ),
@@ -433,10 +551,10 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
         const SizedBox(width: 12),
         Expanded(
           child: _buildResultCard(
-            'Total',
-            _totalAmount,
+            'Maturity',
+            _maturityAmount,
             Icons.account_balance_rounded,
-            Colors.deepPurple,
+            Colors.cyan,
           ),
         ),
       ],
@@ -485,8 +603,8 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
   }
 
   Widget _buildBreakdownChart() {
-    double principalPercentage = (_principal / _totalAmount) * 100;
-    double interestPercentage = (_simpleInterest / _totalAmount) * 100;
+    double investmentPercentage = (_investment / _maturityAmount) * 100;
+    double interestPercentage = (_totalInterest / _maturityAmount) * 100;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -515,7 +633,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
               height: 200,
               child: CustomPaint(
                 painter: PieChartPainter(
-                  principalPercentage: principalPercentage,
+                  investmentPercentage: investmentPercentage,
                   interestPercentage: interestPercentage,
                 ),
               ),
@@ -526,17 +644,17 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLegendItem(
-                'Principal',
+                'Invested',
                 Colors.blue.shade600,
-                principalPercentage,
-                _principal,
+                investmentPercentage,
+                _investment,
               ),
               const SizedBox(width: 32),
               _buildLegendItem(
                 'Interest',
                 Colors.green.shade600,
                 interestPercentage,
-                _simpleInterest,
+                _totalInterest,
               ),
             ],
           ),
@@ -544,7 +662,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
           Row(
             children: [
               Expanded(
-                flex: principalPercentage.toInt(),
+                flex: investmentPercentage.toInt(),
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
@@ -558,7 +676,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                   ),
                   child: Center(
                     child: Text(
-                      '${principalPercentage.toStringAsFixed(1)}%',
+                      '${investmentPercentage.toStringAsFixed(1)}%',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -646,6 +764,90 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
     );
   }
 
+  Widget _buildFrequencyComparison() {
+    final comparison = _compareFrequencies();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Compare Interest Frequencies',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'See how compounding frequency affects maturity',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 20),
+          ...comparison.entries.map((entry) {
+            bool isSelected = entry.key == _compoundingFrequency;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w600,
+                          color: isSelected
+                              ? Colors.cyan.shade700
+                              : Colors.grey.shade700,
+                        ),
+                      ),
+                      Text(
+                        '₹${entry.value.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Colors.cyan.shade700
+                              : Colors.grey.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value:
+                        (entry.value - _investment) /
+                        (_maturityAmount - _investment),
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isSelected ? Colors.cyan.shade600 : Colors.grey.shade400,
+                    ),
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
   Widget _buildYearlyBreakdown() {
     final breakdown = _getYearlyBreakdown();
 
@@ -666,27 +868,31 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Year-wise Growth',
+            'Year-wise FD Growth',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Interest grows linearly',
+            'Compounded $_compoundingFrequency',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 20),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              headingRowColor: WidgetStateProperty.all(
-                Colors.deepPurple.shade50,
-              ),
+              headingRowColor: WidgetStateProperty.all(Colors.cyan.shade50),
               border: TableBorder.all(color: Colors.grey.shade300, width: 1),
               columnSpacing: 20,
               columns: const [
                 DataColumn(
                   label: Text(
                     'Year',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Maturity Amount',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
@@ -702,12 +908,6 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
-                DataColumn(
-                  label: Text(
-                    'Total Amount',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                  ),
-                ),
               ],
               rows: breakdown.map((row) {
                 return DataRow(
@@ -716,6 +916,15 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                       Text(
                         '${row['year']}',
                         style: const TextStyle(fontSize: 11),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '₹${(row['amount']).toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     DataCell(
@@ -732,16 +941,7 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
                         '₹${(row['totalInterest']).toStringAsFixed(0)}',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.deepPurple.shade700,
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        '₹${(row['totalAmount']).toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          color: Colors.cyan.shade700,
                         ),
                       ),
                     ),
@@ -755,15 +955,15 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
     );
   }
 
-  Widget _buildFormulaCard() {
+  Widget _buildInfoCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.deepPurple.shade50, Colors.deepPurple.shade100],
+          colors: [Colors.cyan.shade50, Colors.cyan.shade100],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.deepPurple.shade200),
+        border: Border.all(color: Colors.cyan.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -771,141 +971,52 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
           Row(
             children: [
               Icon(
-                Icons.calculate_rounded,
-                color: Colors.deepPurple.shade700,
+                Icons.info_outline_rounded,
+                color: Colors.cyan.shade700,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
-                'Simple Interest Formula',
+                'About Fixed Deposits',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade900,
+                  color: Colors.cyan.shade900,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
+          Text(
+            'Fixed Deposits (FD) are safe investment options offered by banks where you deposit a lump sum amount for a fixed tenure at a predetermined interest rate. The interest is typically compounded quarterly.',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.cyan.shade800,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SI = (P × R × T) / 100',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.deepPurple.shade700,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Divider(),
-                const SizedBox(height: 12),
-                _buildFormulaRow('SI', 'Simple Interest'),
-                _buildFormulaRow('P', 'Principal Amount'),
-                _buildFormulaRow('R', 'Rate of Interest (% p.a.)'),
-                _buildFormulaRow('T', 'Time Period (years)'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple.shade700,
               borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline, size: 20, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'SI = (${_principal.toStringAsFixed(0)} × ${_rate.toStringAsFixed(1)} × ${_time.toStringAsFixed(1)}) / 100 = ₹${_simpleInterest.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.amber.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.shade200),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.lightbulb_outline,
+                  Icons.check_circle,
+                  color: Colors.green.shade600,
                   size: 20,
-                  color: Colors.amber.shade700,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Simple interest grows linearly. The interest amount is same every year!',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.amber.shade900,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    'Tax on FD interest is applicable as per your income tax slab',
+                    style: TextStyle(fontSize: 12, color: Colors.cyan.shade700),
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFormulaRow(String symbol, String description) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 35,
-            height: 30,
-            decoration: BoxDecoration(
-              color: Colors.deepPurple.shade100,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                symbol,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade700,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                description,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-              ),
             ),
           ),
         ],
@@ -915,19 +1026,19 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
 
   @override
   void dispose() {
-    _principalController.dispose();
+    _investmentController.dispose();
     _rateController.dispose();
-    _timeController.dispose();
+    _tenureController.dispose();
     super.dispose();
   }
 }
 
 class PieChartPainter extends CustomPainter {
-  final double principalPercentage;
+  final double investmentPercentage;
   final double interestPercentage;
 
   PieChartPainter({
-    required this.principalPercentage,
+    required this.investmentPercentage,
     required this.interestPercentage,
   });
 
@@ -936,7 +1047,7 @@ class PieChartPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
 
-    final principalPaint = Paint()
+    final investmentPaint = Paint()
       ..color = Colors.blue.shade600
       ..style = PaintingStyle.fill;
 
@@ -944,19 +1055,19 @@ class PieChartPainter extends CustomPainter {
       ..color = Colors.green.shade600
       ..style = PaintingStyle.fill;
 
-    final principalAngle = (principalPercentage / 100) * 2 * pi;
+    final investmentAngle = (investmentPercentage / 100) * 2 * pi;
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -pi / 2,
-      principalAngle,
+      investmentAngle,
       true,
-      principalPaint,
+      investmentPaint,
     );
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
-      -pi / 2 + principalAngle,
+      -pi / 2 + investmentAngle,
       (interestPercentage / 100) * 2 * pi,
       true,
       interestPaint,

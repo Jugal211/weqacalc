@@ -99,6 +99,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-Project Link: [https://github.com/your-username/weqacalc](https://github.com/your-username/weqacalc)
+Project Link: [https://github.com/Jugal211/weqacalc](https://github.com/Jugal211/weqacalc)
 
 
