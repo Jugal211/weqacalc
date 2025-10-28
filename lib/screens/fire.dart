@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../utils/investmentcalcgrid.dart';
+import '../utils/firecalcgrid.dart';
 import '../widgets/buildheader.dart';
 
-class InvestmentScreen extends StatelessWidget {
-  const InvestmentScreen({super.key});
+class FIREScreen extends StatelessWidget {
+  const FIREScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class InvestmentScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 24),
                     const Text(
-                      'Investment Calculators',
+                      'FIRE Calculators',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

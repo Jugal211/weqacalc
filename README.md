@@ -11,6 +11,7 @@ WeqaCalc is a comprehensive Flutter-based financial calculator application desig
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [License](#license)
+- [To-Do](#to-do)
 
 ## Features
 
@@ -40,7 +41,7 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/weqacalc.git
+    git clone https://github.com/Jugal211/weqacalc.git
     cd weqacalc
     ```
 2.  **Get dependencies:**
@@ -70,12 +71,19 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 │   │   ├── investment.dart
 │   │   ├── loans.dart
 │   │   └── retirement.dart
+│   │   ├── investment_calculator/ # Investment calculator screens
+│   │   ├── loan_calculator/       # Loan calculator screens
+│   │   └── retirement_calculator/ # Retirement calculator screens
 │   ├── styles/               # Application-wide styles and themes
 │   └── utils/                # Utility functions and custom widgets
 │       ├── calculatorgrid.dart
 │       ├── investmentcalcgrid.dart
 │       ├── loancalcgrid.dart
 │       └── retirementcalcgrid.dart
+│   └── widgets/              # Reusable widgets
+│       ├── appbar.dart
+│       ├── appdrawer.dart
+│       └── buildheader.dart
 └── pubspec.yaml              # Project dependencies and metadata
 └── README.md                 # Project documentation
 ```
@@ -96,6 +104,14 @@ Don't forget to give the project a star! Thanks again!
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+## To-Do
+
+- [ ] Add more financial calculators (e.g., mortgage, savings)
+- [ ] Implement user accounts to save calculations
+- [ ] Add charts and graphs for better visualization
+- [ ] Improve UI/UX and add animations
+- [ ] Add localization for multiple languages
 
 ---
 

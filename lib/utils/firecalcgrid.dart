@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
-import '../screens/loans.dart';
-import '../screens/investment.dart';
-import '../screens/retirement.dart';
+import '../screens/coming_soon_screen.dart';
 
 Widget buildCalculatorGrid(BuildContext context) {
   final calculators = [
     CalculatorItem(
-      icon: Icons.trending_up,
-      title: 'Loan Calculator',
-      subtitle: 'For all types of loan',
-      color: Colors.redAccent.shade400,
-      gradient: [Colors.redAccent.shade400, Colors.redAccent.shade700],
-      route: const LoanScreen(),
+      icon: Icons.eco,
+      title: 'Lean FIRE',
+      subtitle: 'Basic financial independence',
+      color: Colors.green.shade400,
+      gradient: [Colors.green.shade400, Colors.green.shade600],
+      route: const ComingSoonScreen(),
     ),
     CalculatorItem(
-      icon: Icons.account_balance_wallet,
-      title: 'Investment',
-      subtitle: 'Returns & Growth',
-      color: Colors.purple.shade400,
-      gradient: [Colors.purple.shade400, Colors.purple.shade600],
-      route: const InvestmentScreen(),
+      icon: Icons.diamond,
+      title: 'Fat FIRE',
+      subtitle: 'Plan your retirement luxuriously',
+      color: Colors.amber.shade400,
+      gradient: [Colors.amber.shade400, Colors.amber.shade600],
+      route: const ComingSoonScreen(),
     ),
     CalculatorItem(
-      icon: Icons.security,
-      title: 'Retirement',
-      subtitle: 'Plan Ahead',
-      color: Colors.indigo.shade400,
-      gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
-      route: const RetirementScreen(),
+      icon: Icons.local_cafe,
+      title: 'Barista FIRE',
+      subtitle: 'Near-financial freedom',
+      color: Colors.brown.shade400,
+      gradient: [Colors.brown.shade400, Colors.brown.shade600],
+      route: const ComingSoonScreen(),
+    ),
+    CalculatorItem(
+      icon: Icons.beach_access,
+      title: 'Coast FIRE',
+      subtitle: 'Invest early, retire late',
+      color: Colors.teal.shade400,
+      gradient: [Colors.teal.shade400, Colors.teal.shade600],
+      route: const ComingSoonScreen(),
     ),
   ];
 

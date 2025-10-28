@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-class RDCalculator extends StatefulWidget {
-  const RDCalculator({super.key});
+class PPFCalculator extends StatefulWidget {
+  const PPFCalculator({super.key});
 
   @override
-  State<RDCalculator> createState() => _RDCalculatorState();
+  State<PPFCalculator> createState() => _PPFCalculatorState();
 }
 
-class _RDCalculatorState extends State<RDCalculator> {
-  final _monthlyDepositController = TextEditingController();
-  final _rateController = TextEditingController();
-  final _tenureController = TextEditingController();
+class _PPFCalculatorState extends State<PPFCalculator> {
+  final _yearlyInvestmentController = TextEditingController();
+  final _timePeriodController = TextEditingController();
 
-  double _monthlyDeposit = 5000;
-  double _rate = 7;
-  double _tenure = 5;
+  double _yearlyInvestment = 100000;
+  int _timePeriod = 15;
+  final double _rate = 7.1; // Fixed rate
 
   double _totalInvestment = 0;
   double _totalInterest = 0;
@@ -24,87 +23,57 @@ class _RDCalculatorState extends State<RDCalculator> {
   @override
   void initState() {
     super.initState();
-    _monthlyDepositController.text = _monthlyDeposit.toStringAsFixed(0);
-    _rateController.text = _rate.toStringAsFixed(1);
-    _tenureController.text = _tenure.toStringAsFixed(1);
+    _yearlyInvestmentController.text = _yearlyInvestment.toStringAsFixed(0);
+    _timePeriodController.text = _timePeriod.toString();
     _calculate();
   }
 
   void _calculate() {
-    // RD Formula: M = P × n × (n + 1) × (r / 2400)
-    // Where: M = Maturity Amount, P = Monthly Deposit, n = Number of months, r = Rate of Interest
+    // PPF uses compound interest calculated yearly
+    // Formula: A = P × [((1 + r)^n - 1) / r]
+    // Where interest is compounded annually
 
-    int n = (_tenure * 12).toInt();
-    double r = _rate;
+    double r = _rate / 100;
+    int n = _timePeriod;
 
-    // Calculate interest earned
-    _totalInterest = _monthlyDeposit * n * (n + 1) * (r / 2400);
-
-    // Total investment
-    _totalInvestment = _monthlyDeposit * n;
-
-    // Maturity amount
-    _maturityAmount = _totalInvestment + _totalInterest;
+    // Future value of annuity formula
+    _maturityAmount = _yearlyInvestment * ((pow(1 + r, n) - 1) / r) * (1 + r);
+    _totalInvestment = _yearlyInvestment * n;
+    _totalInterest = _maturityAmount - _totalInvestment;
 
     setState(() {});
   }
 
   List<Map<String, dynamic>> _getYearlyBreakdown() {
     List<Map<String, dynamic>> breakdown = [];
-    double r = _rate;
+    double r = _rate / 100;
+    double balance = 0;
 
-    for (int year = 0; year <= _tenure.ceil(); year++) {
-      int months = year * 12;
-
-      if (months == 0) {
+    for (int year = 0; year <= _timePeriod; year++) {
+      if (year == 0) {
         breakdown.add({
           'year': 0,
-          'invested': 0.0,
+          'deposit': 0.0,
           'interest': 0.0,
-          'maturity': 0.0,
-        });
-        continue;
-      }
-
-      double invested = _monthlyDeposit * months;
-      double interest = _monthlyDeposit * months * (months + 1) * (r / 2400);
-      double maturity = invested + interest;
-
-      breakdown.add({
-        'year': year,
-        'invested': invested,
-        'interest': interest,
-        'maturity': maturity,
-      });
-    }
-
-    return breakdown;
-  }
-
-  List<Map<String, dynamic>> _getMonthlyBreakdown() {
-    List<Map<String, dynamic>> breakdown = [];
-    double r = _rate;
-    int totalMonths = (_tenure * 12).toInt();
-
-    for (int month = 0; month <= min(totalMonths, 24); month++) {
-      if (month == 0) {
-        breakdown.add({
-          'month': 0,
-          'invested': 0.0,
-          'interest': 0.0,
+          'totalInvested': 0.0,
           'balance': 0.0,
         });
         continue;
       }
 
-      double invested = _monthlyDeposit * month;
-      double interest = _monthlyDeposit * month * (month + 1) * (r / 2400);
-      double balance = invested + interest;
+      // Add yearly investment at the beginning of the year
+      balance += _yearlyInvestment;
+      double totalInvested = _yearlyInvestment * year;
+
+      // Calculate interest for the year
+      double interest = balance * r;
+      balance += interest;
 
       breakdown.add({
-        'month': month,
-        'invested': invested,
+        'year': year,
+        'deposit': _yearlyInvestment,
         'interest': interest,
+        'totalInvested': totalInvested,
         'balance': balance,
       });
     }
@@ -116,8 +85,8 @@ class _RDCalculatorState extends State<RDCalculator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('RD Calculator'),
-        backgroundColor: Colors.pink.shade600,
+        title: const Text('PPF Calculator'),
+        backgroundColor: Colors.amber.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -138,8 +107,6 @@ class _RDCalculatorState extends State<RDCalculator> {
                   const SizedBox(height: 20),
                   _buildYearlyBreakdown(),
                   const SizedBox(height: 20),
-                  _buildMonthlyBreakdown(),
-                  const SizedBox(height: 20),
                   _buildInfoCard(),
                 ],
               ),
@@ -156,7 +123,7 @@ class _RDCalculatorState extends State<RDCalculator> {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.pink.shade600, Colors.pink.shade400],
+          colors: [Colors.amber.shade700, Colors.amber.shade500],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -164,7 +131,7 @@ class _RDCalculatorState extends State<RDCalculator> {
       child: Column(
         children: [
           const Icon(
-            Icons.calendar_month_rounded,
+            Icons.account_balance_wallet_rounded,
             size: 70,
             color: Colors.white,
           ),
@@ -189,7 +156,7 @@ class _RDCalculatorState extends State<RDCalculator> {
           ),
           const SizedBox(height: 8),
           Text(
-            'after ${_tenure.toStringAsFixed(1)} years',
+            'after $_timePeriod years',
             style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
         ],
@@ -215,76 +182,145 @@ class _RDCalculatorState extends State<RDCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'RD Details',
+            'PPF Account Details',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Monthly Deposit',
-            value: _monthlyDeposit,
+            label: 'Yearly Investment',
+            value: _yearlyInvestment,
             min: 500,
-            max: 100000,
-            divisions: 199,
+            max: 150000,
+            divisions: 299,
             prefix: '₹',
-            controller: _monthlyDepositController,
+            controller: _yearlyInvestmentController,
             onChanged: (val) {
               setState(() {
-                _monthlyDeposit = val;
-                _monthlyDepositController.text = val.toStringAsFixed(0);
+                _yearlyInvestment = val;
+                _yearlyInvestmentController.text = val.toStringAsFixed(0);
                 _calculate();
               });
             },
           ),
-          const SizedBox(height: 24),
-          _buildSliderInput(
-            label: 'Rate of Interest (% p.a.)',
-            value: _rate,
-            min: 1,
-            max: 15,
-            divisions: 140,
-            suffix: '%',
-            controller: _rateController,
-            onChanged: (val) {
-              setState(() {
-                _rate = val;
-                _rateController.text = val.toStringAsFixed(1);
-                _calculate();
-              });
-            },
-          ),
-          const SizedBox(height: 24),
-          _buildSliderInput(
-            label: 'Time Period (Tenure)',
-            value: _tenure,
-            min: 0.5,
-            max: 20,
-            divisions: 39,
-            suffix: ' Years',
-            controller: _tenureController,
-            onChanged: (val) {
-              setState(() {
-                _tenure = val;
-                _tenureController.text = val.toStringAsFixed(1);
-                _calculate();
-              });
-            },
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.pink.shade50,
+              color: Colors.orange.shade50,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.pink.shade200),
+              border: Border.all(color: Colors.orange.shade200),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 20, color: Colors.pink.shade700),
+                Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: Colors.orange.shade700,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'You will deposit ₹${_monthlyDeposit.toStringAsFixed(0)} every month for ${(_tenure * 12).toInt()} months',
-                    style: TextStyle(fontSize: 12, color: Colors.pink.shade700),
+                    'Maximum yearly investment is capped at ₹1,50,000',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildSliderInput(
+            label: 'Time Period',
+            value: _timePeriod.toDouble(),
+            min: 15,
+            max: 50,
+            divisions: 35,
+            suffix: ' Years',
+            controller: _timePeriodController,
+            onChanged: (val) {
+              setState(() {
+                _timePeriod = val.toInt();
+                _timePeriodController.text = val.toInt().toString();
+                _calculate();
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.lock_outline, size: 20, color: Colors.red.shade700),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'PPF has a lock-in period of 15 years (minimum tenure)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.red.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.amber.shade200, width: 2),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rate of Interest',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Fixed by Government',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade700,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${_rate.toStringAsFixed(1)}%',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -343,23 +379,23 @@ class _RDCalculatorState extends State<RDCalculator> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.pink.shade50,
+                  color: Colors.amber.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.pink.shade200, width: 1.5),
+                  border: Border.all(color: Colors.amber.shade200, width: 1.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$prefix${value.toStringAsFixed(suffix == '%' || suffix.contains('Year') ? 1 : 0)}$suffix',
+                      '$prefix${value.toStringAsFixed(suffix.contains('Year') ? 0 : 0)}$suffix',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.pink.shade700,
+                        color: Colors.amber.shade700,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Icon(Icons.edit, size: 16, color: Colors.pink.shade700),
+                    Icon(Icons.edit, size: 16, color: Colors.amber.shade700),
                   ],
                 ),
               ),
@@ -369,10 +405,10 @@ class _RDCalculatorState extends State<RDCalculator> {
         const SizedBox(height: 12),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: Colors.pink.shade600,
-            inactiveTrackColor: Colors.pink.shade100,
-            thumbColor: Colors.pink.shade700,
-            overlayColor: Colors.pink.shade100,
+            activeTrackColor: Colors.amber.shade700,
+            inactiveTrackColor: Colors.amber.shade100,
+            thumbColor: Colors.amber.shade800,
+            overlayColor: Colors.amber.shade100,
             trackHeight: 6,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
           ),
@@ -382,9 +418,7 @@ class _RDCalculatorState extends State<RDCalculator> {
             max: max,
             divisions: divisions,
             onChanged: (val) {
-              controller.text = val.toStringAsFixed(
-                suffix == '%' || suffix.contains('Year') ? 1 : 0,
-              );
+              controller.text = val.toStringAsFixed(0);
               onChanged(val);
             },
           ),
@@ -419,9 +453,10 @@ class _RDCalculatorState extends State<RDCalculator> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
+              borderSide: BorderSide(color: Colors.amber.shade700, width: 2),
             ),
-            hintText: 'Enter value',
+            hintText:
+                'Min: ${min.toStringAsFixed(0)}, Max: ${max.toStringAsFixed(0)}',
           ),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
@@ -443,14 +478,16 @@ class _RDCalculatorState extends State<RDCalculator> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Please enter a value between $min and $max'),
+                    content: Text(
+                      'Please enter a value between ${min.toStringAsFixed(0)} and ${max.toStringAsFixed(0)}',
+                    ),
                     backgroundColor: Colors.red.shade400,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.pink.shade600,
+              backgroundColor: Colors.amber.shade700,
               foregroundColor: Colors.white,
             ),
             child: const Text('Save'),
@@ -486,7 +523,7 @@ class _RDCalculatorState extends State<RDCalculator> {
             'Maturity',
             _maturityAmount,
             Icons.account_balance_rounded,
-            Colors.pink,
+            Colors.amber,
           ),
         ),
       ],
@@ -716,19 +753,19 @@ class _RDCalculatorState extends State<RDCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Year-wise RD Growth',
+            'Year-wise PPF Growth',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Monthly deposits with compound interest',
+            'Annual deposits with ${_rate.toStringAsFixed(1)}% interest',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 20),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              headingRowColor: WidgetStateProperty.all(Colors.pink.shade50),
+              headingRowColor: WidgetStateProperty.all(Colors.amber.shade50),
               border: TableBorder.all(color: Colors.grey.shade300, width: 1),
               columnSpacing: 20,
               columns: const [
@@ -740,35 +777,44 @@ class _RDCalculatorState extends State<RDCalculator> {
                 ),
                 DataColumn(
                   label: Text(
-                    'Total Invested',
+                    'Deposit',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 DataColumn(
                   label: Text(
-                    'Interest Earned',
+                    'Interest',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 DataColumn(
                   label: Text(
-                    'Maturity Amount',
+                    'Balance',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
               ],
               rows: breakdown.map((row) {
+                bool isMaturityYear = row['year'] == _timePeriod;
                 return DataRow(
+                  color: isMaturityYear
+                      ? WidgetStateProperty.all(Colors.amber.shade50)
+                      : null,
                   cells: [
                     DataCell(
                       Text(
                         '${row['year']}',
-                        style: const TextStyle(fontSize: 11),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isMaturityYear
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
                       ),
                     ),
                     DataCell(
                       Text(
-                        '₹${(row['invested']).toStringAsFixed(0)}',
+                        '₹${(row['deposit']).toStringAsFixed(0)}',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.blue.shade700,
@@ -786,10 +832,13 @@ class _RDCalculatorState extends State<RDCalculator> {
                     ),
                     DataCell(
                       Text(
-                        '₹${(row['maturity']).toStringAsFixed(0)}',
-                        style: const TextStyle(
+                        '₹${(row['balance']).toStringAsFixed(0)}',
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
+                          color: isMaturityYear
+                              ? Colors.amber.shade700
+                              : Colors.grey.shade800,
                         ),
                       ),
                     ),
@@ -803,140 +852,15 @@ class _RDCalculatorState extends State<RDCalculator> {
     );
   }
 
-  Widget _buildMonthlyBreakdown() {
-    final breakdown = _getMonthlyBreakdown();
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Text(
-                  'Monthly Deposit Schedule',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.pink.shade50,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'First ${breakdown.length - 1} months',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.pink.shade700,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            height: 300,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ListView.builder(
-              itemCount: breakdown.length,
-              itemBuilder: (context, index) {
-                final row = breakdown[index];
-                final isEvenRow = index % 2 == 0;
-
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isEvenRow ? Colors.grey.shade50 : Colors.white,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade200),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'M${row['month']}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Inv: ₹${(row['invested']).toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                            Text(
-                              'Int: ₹${(row['interest']).toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.green.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Bal: ₹${(row['balance']).toStringAsFixed(0)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade700,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInfoCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.pink.shade50, Colors.pink.shade100],
+          colors: [Colors.amber.shade50, Colors.amber.shade100],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.pink.shade200),
+        border: Border.all(color: Colors.amber.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -945,26 +869,26 @@ class _RDCalculatorState extends State<RDCalculator> {
             children: [
               Icon(
                 Icons.info_outline_rounded,
-                color: Colors.pink.shade700,
+                color: Colors.amber.shade700,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
-                'About Recurring Deposits',
+                'About PPF',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.pink.shade900,
+                  color: Colors.amber.shade900,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            'Recurring Deposits (RD) allow you to save a fixed amount every month for a specific period. Interest is compounded quarterly, similar to Fixed Deposits.',
+            'Public Provident Fund (PPF) is a government-backed long-term savings scheme with guaranteed returns and tax benefits under Section 80C.',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.pink.shade800,
+              color: Colors.amber.shade800,
               height: 1.5,
             ),
           ),
@@ -977,45 +901,21 @@ class _RDCalculatorState extends State<RDCalculator> {
             ),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calculate_rounded,
-                      color: Colors.pink.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Formula: M = P × n × (n + 1) / 2 × (r / 100)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.pink.shade700,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  ],
+                _buildInfoRow(Icons.lock, 'Lock-in Period: 15 years (minimum)'),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.account_balance_wallet,
+                  'Max Investment: ₹1,50,000 per year',
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green.shade600,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Ideal for regular monthly savings with guaranteed returns',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.pink.shade700,
-                        ),
-                      ),
-                    ),
-                  ],
+                _buildInfoRow(
+                  Icons.verified_user,
+                  'Tax-Free Returns (EEE status)',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.trending_up,
+                  'Interest: ${_rate.toStringAsFixed(1)}% p.a. (Compounded Annually)',
                 ),
               ],
             ),
@@ -1025,11 +925,25 @@ class _RDCalculatorState extends State<RDCalculator> {
     );
   }
 
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.amber.shade700),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(fontSize: 12, color: Colors.amber.shade700),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
-    _monthlyDepositController.dispose();
-    _rateController.dispose();
-    _tenureController.dispose();
+    _yearlyInvestmentController.dispose();
+    _timePeriodController.dispose();
     super.dispose();
   }
 }

@@ -5,7 +5,9 @@ import '../screens/investment_calculator/simple_interest_calc.dart';
 import '../screens/investment_calculator/compound_interest_calc.dart';
 import '../screens/investment_calculator/fd_calc.dart';
 import '../screens/investment_calculator/rd_calc.dart';
-// import '../screens/loans.dart';
+import '../screens/investment_calculator/ppf_calc.dart';
+import '../screens/investment_calculator/epf_calc.dart';
+import '../screens/investment_calculator/ssy_calc.dart';
 
 Widget buildCalculatorGrid(BuildContext context) {
   final calculators = [
@@ -63,7 +65,7 @@ Widget buildCalculatorGrid(BuildContext context) {
       subtitle: 'Public Provident Fund',
       color: Colors.indigo.shade400,
       gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
-      route: const FDCalculator(),
+      route: const PPFCalculator(),
     ),
     CalculatorItem(
       icon: Icons.business,
@@ -71,7 +73,7 @@ Widget buildCalculatorGrid(BuildContext context) {
       subtitle: 'Employee Provident Fund',
       color: Colors.lime.shade400,
       gradient: [Colors.lime.shade400, Colors.lime.shade600],
-      route: const FDCalculator(),
+      route: const EPFCalculator(),
     ),
     CalculatorItem(
       icon: Icons.face_3,
@@ -79,15 +81,8 @@ Widget buildCalculatorGrid(BuildContext context) {
       subtitle: 'Sukanya Samriddhi Yojana',
       color: Colors.teal.shade400,
       gradient: [Colors.teal.shade400, Colors.teal.shade600],
-      route: const FDCalculator(),
+      route: const SSYCalculator(),
     ),
-    // CalculatorItem(
-    //   icon: Icons.currency_exchange,
-    //   title: 'Currency',
-    //   subtitle: 'Exchange Rates',
-    //   color: Colors.cyan.shade400,
-    //   gradient: [Colors.cyan.shade400, Colors.cyan.shade600],
-    // ),
   ];
 
   return GridView.builder(

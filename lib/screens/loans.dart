@@ -21,7 +21,7 @@ class LoanScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 24),
                     const Text(
-                      'Calculators',
+                      'Loan Calculators',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
