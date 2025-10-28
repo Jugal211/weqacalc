@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import './screens/homescreen.dart';
-
-// void main() {
-//   runApp(const MainApp());
-// }
+import '../screens/financial_calc_home.dart';
 
 void main() {
-  runApp(const FinancialCalculatorApp());
+  runApp(const MyApp());
 }
 
-// class MainApp extends StatelessWidget {
-//   const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return const MaterialApp(
-//       home: Scaffold(body: Center(child: Text('Hello World!'))),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Financial Calculator',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      home: const FinancialCalculatorHome(),
+    );
+  }
+}

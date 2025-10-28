@@ -821,7 +821,7 @@ class _FDCalculatorState extends State<FDCalculator> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

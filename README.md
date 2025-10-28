@@ -12,6 +12,7 @@ WeqaCalc is a comprehensive Flutter-based financial calculator application desig
 - [Contributing](#contributing)
 - [License](#license)
 - [To-Do](#to-do)
+- [Privacy Policy](#privacy-policy)
 
 ## Features
 
@@ -65,27 +66,33 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 .
 ├── lib/
 │   ├── main.dart             # Main entry point of the application
-│   ├── models/               # Data models for calculations
 │   ├── screens/              # UI for different calculator screens
-│   │   ├── homescreen.dart
-│   │   ├── investment.dart
-│   │   ├── loans.dart
-│   │   └── retirement.dart
-│   │   ├── investment_calculator/ # Investment calculator screens
-│   │   ├── loan_calculator/       # Loan calculator screens
-│   │   └── retirement_calculator/ # Retirement calculator screens
-│   ├── styles/               # Application-wide styles and themes
-│   └── utils/                # Utility functions and custom widgets
-│       ├── calculatorgrid.dart
-│       ├── investmentcalcgrid.dart
-│       ├── loancalcgrid.dart
-│       └── retirementcalcgrid.dart
+│   │   ├── coming_soon_screen.dart
+│   │   ├── financial_calc_home.dart
+│   │   ├── investment_calculator/
+│   │   │   ├── cagr_calc.dart
+│   │   │   ├── compound_interest_calc.dart
+│   │   │   ├── epf_calc.dart
+│   │   │   ├── fd_calc.dart
+│   │   │   ├── ppf_calc.dart
+│   │   │   ├── rd_calc.dart
+│   │   │   ├── simple_interest_calc.dart
+│   │   │   ├── sip_calc.dart
+│   │   │   └── ssy_calc.dart
+│   │   ├── loan_calculator/
+│   │   │   ├── emi_calc.dart
+│   │   │   ├── home_loan_calc.dart
+│   │   │   └── loan_prepay_calc.dart
+│   │   └── retirement_calculator/
+│   ├── utils/                # Utility functions and custom widgets
+│   │   └── filteredcalc.dart
 │   └── widgets/              # Reusable widgets
-│       ├── appbar.dart
-│       ├── appdrawer.dart
-│       └── buildheader.dart
+│       ├── buildheader.dart
+│       └── notification.dart
 └── pubspec.yaml              # Project dependencies and metadata
 └── README.md                 # Project documentation
+└── PRIVACY_POLICY.md         # Privacy Policy document
+└── LICENSE                   # Project License
 ```
 
 ## Contributing
@@ -112,6 +119,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [ ] Add charts and graphs for better visualization
 - [ ] Improve UI/UX and add animations
 - [ ] Add localization for multiple languages
+
+## Privacy Policy
+
+We are committed to protecting your privacy. Please read our [Privacy Policy](PRIVACY_POLICY.md) to understand how we handle your data.
 
 ---
 
