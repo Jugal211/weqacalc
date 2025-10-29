@@ -1,5 +1,29 @@
 import 'package:flutter/material.dart';
-import '../utils/filteredcalc.dart';
+// import 'package:weqacalc/widgets/about.dart' as about;
+import 'package:weqacalc/widgets/settings.dart';
+// import 'package:weqacalc/utils/calculator_card.dart';
+import 'package:weqacalc/utils/calculator_grid.dart';
+import 'package:weqacalc/models/calculator_item.dart';
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Financial Calculator',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.grey.shade50,
+        cardColor: Colors.white,
+      ),
+      home: const FinancialCalculatorHome(),
+    );
+  }
+}
 
 class FinancialCalculatorHome extends StatefulWidget {
   const FinancialCalculatorHome({super.key});
@@ -37,6 +61,15 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
     super.dispose();
   }
 
+  void _showSettingsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const SettingsBottomSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +86,7 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
             children: [
               _buildHeader(),
               _buildCategoryTabs(),
-              Expanded(child: _buildCalculatorGrid()),
+              Expanded(child: buildCalculatorGrid(categories, _selectedIndex)),
             ],
           ),
         ),
@@ -103,16 +136,19 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.notifications_rounded,
-                  color: Colors.white,
-                  size: 24,
+              GestureDetector(
+                onTap: _showSettingsBottomSheet,
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
               ),
             ],
@@ -183,129 +219,6 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildCalculatorGrid() {
-    final calculators = getFilteredCalculators(categories, _selectedIndex);
-
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      child: GridView.builder(
-        key: ValueKey(_selectedIndex),
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.85,
-        ),
-        itemCount: calculators.length,
-        itemBuilder: (context, index) {
-          return _buildCalculatorCard(calculators[index], index);
-        },
-      ),
-    );
-  }
-
-  Widget _buildCalculatorCard(CalculatorItem item, int index) {
-    return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 400 + (index * 50)),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, value, child) {
-        return Transform.scale(
-          scale: value,
-          child: Opacity(opacity: value, child: child),
-        );
-      },
-      child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Opening ${item.title}...'),
-              duration: Duration(seconds: 1),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              margin: EdgeInsets.all(16),
-            ),
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => item.route),
-          );
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: item.gradient[1].withValues(alpha: 0.2),
-                blurRadius: 15,
-                offset: Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: item.gradient,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: item.gradient[1].withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      offset: Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Icon(item.icon, color: Colors.white, size: 36),
-              ),
-              SizedBox(height: 16),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    Text(
-                      item.title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade900,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      item.subtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade600,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

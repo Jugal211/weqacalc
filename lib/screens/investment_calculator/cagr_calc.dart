@@ -114,8 +114,6 @@ class _CAGRCalculatorState extends State<CAGRCalculator> {
   }
 
   Widget _buildHeader() {
-    Color cagrColor = _cagr >= 0 ? Colors.green : Colors.red;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),

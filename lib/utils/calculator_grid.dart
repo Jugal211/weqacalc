@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:weqacalc/models/calculator_item.dart';
+import 'package:weqacalc/utils/calculator_card.dart';
 import '../screens/investment_calculator/sip_calc.dart';
 import '../screens/investment_calculator/cagr_calc.dart';
 import '../screens/investment_calculator/simple_interest_calc.dart';
@@ -146,27 +148,45 @@ List<CalculatorItem> getFilteredCalculators(
   }
 }
 
-class CalculatorCategory {
-  final String name;
-  final IconData icon;
+Widget buildCalculatorGrid(
+  List<CalculatorCategory> categories,
+  int selectedIndex,
+) {
+  final calculators = getFilteredCalculators(categories, selectedIndex);
 
-  CalculatorCategory({required this.name, required this.icon});
-}
-
-class CalculatorItem {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final List<Color> gradient;
-  final String category;
-  final Widget route;
-
-  CalculatorItem({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.gradient,
-    required this.category,
-    required this.route,
-  });
+  return AnimatedSwitcher(
+    duration: Duration(milliseconds: 300),
+    child: Column(
+      key: ValueKey(selectedIndex),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Text(
+            '${calculators.length} Calculators Available',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
+        Expanded(
+          child: GridView.builder(
+            padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: calculators.length,
+            itemBuilder: (context, index) {
+              return buildCalculatorCard(context, calculators[index], index);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
 }

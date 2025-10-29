@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+// void main() {
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({Key? key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'FIRE Calculator',
+//       debugShowCheckedModeBanner: false,
+//       theme: ThemeData(
+//         primarySwatch: Colors.orange,
+//         useMaterial3: true,
+//       ),
+//       home: const FIRECalculator(),
+//     );
+//   }
+// }
+
 class FIRECalculator extends StatefulWidget {
   const FIRECalculator({super.key});
 
@@ -64,25 +85,23 @@ class _FIRECalculatorState extends State<FIRECalculator> {
     _expenseAtRetirement =
         _expenseToday * pow(1 + _inflationRate / 100, yearsToRetirement);
 
-    // Lean FIRE: 25 times annual expenses with 3.5% withdrawal rate
-    _leanFIRE = _expenseAtRetirement / 0.035;
+    // Lean FIRE: 15 times annual expenses at retirement
+    _leanFIRE = _expenseAtRetirement * 15;
 
-    // Traditional FIRE: 25-30 times annual expenses with 3.5% withdrawal rate
-    _traditionalFIRE = _expenseAtRetirement / 0.035;
+    // Traditional FIRE: 25 times annual expenses with 4% withdrawal rate
+    _traditionalFIRE = _expenseAtRetirement * 25;
 
-    // Fat FIRE: 30-35 times annual expenses with more cushion
-    _fatFIRE = _expenseAtRetirement / 0.03;
+    // Fat FIRE: 50 times annual expenses
+    _fatFIRE = _expenseAtRetirement * 50;
 
-    // Coast FIRE: Corpus needed at coast age that will grow to retirement
+    // Coast FIRE: Amount needed now that will grow to Traditional FIRE by retirement
     if (_coastFIREAge > _currentAge && _coastFIREAge < _retirementAge) {
-      int coastYears = _coastFIREAge - _currentAge;
       int growthYears = _retirementAge - _coastFIREAge;
       double expenseAtCoastAge =
-          _expenseToday * pow(1 + _inflationRate / 100, coastYears);
+          _expenseToday *
+          pow(1 + _inflationRate / 100, _coastFIREAge - _currentAge);
       double requiredAtRetirement =
-          expenseAtCoastAge *
-          pow(1 + _inflationRate / 100, growthYears) /
-          0.035;
+          expenseAtCoastAge * pow(1 + _inflationRate / 100, growthYears) * 25;
       // Assuming 12% annual return on investments
       _coastFIRE = requiredAtRetirement / pow(1.12, growthYears);
     } else if (_coastFIREAge >= _retirementAge) {
@@ -239,7 +258,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
           _buildSliderInput(
             label: 'Assumed Inflation Rate',
             value: _inflationRate,
-            min: 0,
+            min: 3,
             max: 15,
             divisions: 120,
             suffix: '',
@@ -256,18 +275,13 @@ class _FIRECalculatorState extends State<FIRECalculator> {
           _buildSliderInput(
             label: 'Desired Coast FIRE Age',
             value: _coastFIREAge.toDouble(),
-            min: 18,
+            min: max(_currentAge + 1, 18).toDouble(),
             max: 50,
-            divisions: 32,
+            divisions: max(1, 50 - max(_currentAge + 1, 18)),
             suffix: '',
             controller: _coastFIREAgeController,
             onChanged: (val) {
               setState(() {
-                // Prevent invalid coast age
-                if (val <= _currentAge) {
-                  val = (_currentAge + 1).toDouble();
-                }
-                if (val > 50) val = 50;
                 _coastFIREAge = val.toInt();
                 _coastFIREAgeController.text = val.toInt().toString();
                 _calculate();
@@ -487,7 +501,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
                   'Lean FIRE',
                   '₹${(_leanFIRE / 10000000).toStringAsFixed(2)} Cr',
                   Colors.green,
-                  '3.5% withdrawal rate',
+                  '15x annual expenses',
                 ),
               ),
               const SizedBox(width: 16),
@@ -496,7 +510,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
                   'FIRE',
                   '₹${(_traditionalFIRE / 10000000).toStringAsFixed(2)} Cr',
                   Colors.orange,
-                  '3.5% withdrawal rate',
+                  '25x (4% withdrawal)',
                 ),
               ),
             ],
@@ -509,7 +523,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
                   'Fat FIRE',
                   '₹${(_fatFIRE / 10000000).toStringAsFixed(2)} Cr',
                   Colors.red,
-                  '3% withdrawal rate',
+                  '50x annual expenses',
                 ),
               ),
               const SizedBox(width: 16),
@@ -666,8 +680,8 @@ class _FIRECalculatorState extends State<FIRECalculator> {
             '🔥 Traditional FIRE',
             'Most stringent approach with 50-70% savings rate',
             [
-              '• 25-30x annual expenses corpus',
-              '• 3.5% safe withdrawal rate for India',
+              '• 25x annual expenses corpus',
+              '• 4% safe withdrawal rate',
               '• Covers all living costs through passive income',
               '• Requires significant sacrifice during earning years',
             ],
@@ -678,10 +692,10 @@ class _FIRECalculatorState extends State<FIRECalculator> {
             '🌱 Lean FIRE',
             'Minimalist lifestyle with smaller corpus',
             [
+              '• 15x annual expenses corpus',
               '• Modest budget, cutting to bare minimum',
               '• Living in affordable Tier 2/3 cities',
               '• Focus on experiences over possessions',
-              '• Geographic arbitrage strategy',
             ],
             Colors.green,
           ),
@@ -690,8 +704,8 @@ class _FIRECalculatorState extends State<FIRECalculator> {
             '💎 Fat FIRE',
             'Retire without compromising luxury',
             [
-              '• Substantial corpus for high spending',
-              '• ₹15-40 crore or more corpus',
+              '• 50x annual expenses corpus',
+              '• Substantial buffer for high spending',
               '• International travel, premium healthcare',
               '• Requires high income & aggressive saving',
             ],

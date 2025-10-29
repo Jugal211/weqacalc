@@ -79,8 +79,6 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
     double totalPaid = 0;
 
     while (balance > 0 && monthsPassed < _loanTenure * 12 * 2) {
-      int currentYear = monthsPassed ~/ 12;
-
       // Apply step-up at the beginning of each year
       if (monthsPassed > 0 && monthsPassed % 12 == 0) {
         currentEMI = currentEMI * (1 + _stepUpPercentage / 100);
