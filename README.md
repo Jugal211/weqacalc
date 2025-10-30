@@ -28,7 +28,7 @@ WeqaCalc is a comprehensive Flutter-based financial calculator application desig
 
 | Home Screen | Investment Calculator | Loan Calculator | Retirement Calculator |
 |-------------|-----------------------|-----------------|-----------------------|
-| ![Home Screen](https://via.placeholder.com/200x400?text=Home+Screen) | ![Investment Calculator](https://via.placeholder.com/200x400?text=Investment+Calculator) | ![Loan Calculator](https://via.placeholder.com/200x400?text=Loan+Calculator) | ![Retirement Calculator](https://via.placeholder.com/200x400?text=Retirement+Calculator) |
+| ![Home Screen](assets/screenshots/home_screen.png) | ![Investment Calculator](assets/screenshots/investment_calculator.png) | ![Loan Calculator](assets/screenshots/loan_calculator.png) | ![Retirement Calculator](assets/screenshots/retirement_calculator.png) |
 
 ## Installation
 
@@ -91,10 +91,9 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 │   ├── utils/                # Utility functions and custom widgets
 │   │   ├── calculator_card.dart
 │   │   ├── calculator_grid.dart
-│   │   └── category_tabs.dart
+│   │   └── utils.dart
 │   └── widgets/              # Reusable widgets
 │       ├── about.dart
-│       ├── header.dart
 │       └── settings.dart
 └── pubspec.yaml              # Project dependencies and metadata
 └── README.md                 # Project documentation
