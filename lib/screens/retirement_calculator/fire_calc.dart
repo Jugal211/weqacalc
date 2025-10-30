@@ -1,26 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'FIRE Calculator',
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(
-//         primarySwatch: Colors.orange,
-//         useMaterial3: true,
-//       ),
-//       home: const FIRECalculator(),
-//     );
-//   }
-// }
+import 'package:weqacalc/utils/utils.dart';
 
 class FIRECalculator extends StatefulWidget {
   const FIRECalculator({super.key});
@@ -94,16 +74,28 @@ class _FIRECalculatorState extends State<FIRECalculator> {
     // Fat FIRE: 50 times annual expenses
     _fatFIRE = _expenseAtRetirement * 50;
 
-    // Coast FIRE: Amount needed now that will grow to Traditional FIRE by retirement
-    if (_coastFIREAge > _currentAge && _coastFIREAge < _retirementAge) {
-      int growthYears = _retirementAge - _coastFIREAge;
+    // Coast FIRE: Amount needed now at coast age that will grow to Traditional FIRE by retirement
+    if (_coastFIREAge > _currentAge && _coastFIREAge <= _retirementAge) {
+      int yearsFromNowToCoast = _coastFIREAge - _currentAge;
+      int yearsFromCoastToRetirement = _retirementAge - _coastFIREAge;
+
+      // Calculate expense at coast age
       double expenseAtCoastAge =
-          _expenseToday *
-          pow(1 + _inflationRate / 100, _coastFIREAge - _currentAge);
-      double requiredAtRetirement =
-          expenseAtCoastAge * pow(1 + _inflationRate / 100, growthYears) * 25;
-      // Assuming 12% annual return on investments
-      _coastFIRE = requiredAtRetirement / pow(1.12, growthYears);
+          _expenseToday * pow(1 + _inflationRate / 100, yearsFromNowToCoast);
+
+      // Years from coast to retirement
+      int totalYearsFromCoast = _retirementAge - _coastFIREAge;
+
+      // Calculate what the expense will be at retirement (starting from coast age perspective)
+      double futureExpenseAtRetirement =
+          expenseAtCoastAge *
+          pow(1 + _inflationRate / 100, totalYearsFromCoast);
+
+      // Traditional FIRE target at retirement
+      double fireTarget = futureExpenseAtRetirement * 25;
+
+      // Discount back to coast age assuming 12% annual return
+      _coastFIRE = fireTarget / pow(1.12, totalYearsFromCoast);
     } else if (_coastFIREAge >= _retirementAge) {
       _coastFIRE = _traditionalFIRE;
     } else {
@@ -499,7 +491,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
               Expanded(
                 child: _buildFIREOutput(
                   'Lean FIRE',
-                  '₹${(_leanFIRE / 10000000).toStringAsFixed(2)} Cr',
+                  formatToIndianUnits(_leanFIRE),
                   Colors.green,
                   '15x annual expenses',
                 ),
@@ -508,7 +500,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
               Expanded(
                 child: _buildFIREOutput(
                   'FIRE',
-                  '₹${(_traditionalFIRE / 10000000).toStringAsFixed(2)} Cr',
+                  formatToIndianUnits(_traditionalFIRE),
                   Colors.orange,
                   '25x (4% withdrawal)',
                 ),
@@ -521,7 +513,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
               Expanded(
                 child: _buildFIREOutput(
                   'Fat FIRE',
-                  '₹${(_fatFIRE / 10000000).toStringAsFixed(2)} Cr',
+                  formatToIndianUnits(_fatFIRE),
                   Colors.red,
                   '50x annual expenses',
                 ),
@@ -530,7 +522,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
               Expanded(
                 child: _buildFIREOutput(
                   'Coast FIRE',
-                  '₹${(_coastFIRE / 10000000).toStringAsFixed(2)} Cr',
+                  formatToIndianUnits(_coastFIRE),
                   Colors.teal,
                   'By age $_coastFIREAge',
                 ),
@@ -774,19 +766,21 @@ class _FIRECalculatorState extends State<FIRECalculator> {
             ),
           ),
           const SizedBox(height: 12),
-          ...points.map(
-            (point) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                point,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade800,
-                  height: 1.4,
+          ...points
+              .map(
+                (point) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    point,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade800,
+                      height: 1.4,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
+              )
+              .toList(),
         ],
       ),
     );

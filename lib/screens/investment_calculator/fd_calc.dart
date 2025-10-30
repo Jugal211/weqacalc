@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
 class FDCalculator extends StatefulWidget {
   const FDCalculator({super.key});
@@ -569,7 +570,7 @@ class _FDCalculatorState extends State<FDCalculator> {
           ),
           const SizedBox(height: 4),
           Text(
-            '₹${(amount / 100000).toStringAsFixed(1)}L',
+            formatToIndianUnits(amount),
             style: TextStyle(
               fontSize: 16,
               color: color,
@@ -736,7 +737,7 @@ class _FDCalculatorState extends State<FDCalculator> {
           ),
         ),
         Text(
-          '₹${(amount / 100000).toStringAsFixed(1)}L',
+          formatToIndianUnits(amount),
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
 class HomeLoanCalculator extends StatefulWidget {
   const HomeLoanCalculator({super.key});
@@ -488,7 +489,7 @@ class _HomeLoanCalculatorState extends State<HomeLoanCalculator> {
           ),
           const SizedBox(height: 4),
           Text(
-            '₹${(amount / 100000).toStringAsFixed(1)}L',
+            formatToIndianUnits(amount),
             style: TextStyle(
               fontSize: 16,
               color: color,

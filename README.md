@@ -66,6 +66,8 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 .
 ├── lib/
 │   ├── main.dart             # Main entry point of the application
+│   ├── models/               # Data models for calculations
+│   │   └── calculator_item.dart
 │   ├── screens/              # UI for different calculator screens
 │   │   ├── coming_soon_screen.dart
 │   │   ├── financial_calc_home.dart
@@ -84,11 +86,16 @@ Make sure you have Flutter installed. If not, follow the official Flutter instal
 │   │   │   ├── home_loan_calc.dart
 │   │   │   └── loan_prepay_calc.dart
 │   │   └── retirement_calculator/
+│   │       ├── fire_calc.dart
+│   │       └── retirement_calc.dart
 │   ├── utils/                # Utility functions and custom widgets
-│   │   └── filteredcalc.dart
+│   │   ├── calculator_card.dart
+│   │   ├── calculator_grid.dart
+│   │   └── category_tabs.dart
 │   └── widgets/              # Reusable widgets
-│       ├── buildheader.dart
-│       └── notification.dart
+│       ├── about.dart
+│       ├── header.dart
+│       └── settings.dart
 └── pubspec.yaml              # Project dependencies and metadata
 └── README.md                 # Project documentation
 └── PRIVACY_POLICY.md         # Privacy Policy document

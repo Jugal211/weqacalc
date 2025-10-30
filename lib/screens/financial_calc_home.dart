@@ -1,29 +1,7 @@
 import 'package:flutter/material.dart';
-// import 'package:weqacalc/widgets/about.dart' as about;
 import 'package:weqacalc/widgets/settings.dart';
-// import 'package:weqacalc/utils/calculator_card.dart';
 import 'package:weqacalc/utils/calculator_grid.dart';
 import 'package:weqacalc/models/calculator_item.dart';
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Financial Calculator',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.grey.shade50,
-        cardColor: Colors.white,
-      ),
-      home: const FinancialCalculatorHome(),
-    );
-  }
-}
 
 class FinancialCalculatorHome extends StatefulWidget {
   const FinancialCalculatorHome({super.key});

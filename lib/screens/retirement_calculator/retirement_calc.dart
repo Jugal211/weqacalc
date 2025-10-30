@@ -1,32 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Retirement Calculator',
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
-//       home: const RetirementCalculator(),
-//     );
-//   }
-// }
-
-class RetirementCalculator extends StatefulWidget {
-  const RetirementCalculator({super.key});
+class RetirementPlanningCalculator extends StatefulWidget {
+  const RetirementPlanningCalculator({super.key});
 
   @override
-  State<RetirementCalculator> createState() => _RetirementCalculatorState();
+  State<RetirementPlanningCalculator> createState() =>
+      _RetirementPlanningCalculatorState();
 }
 
-class _RetirementCalculatorState extends State<RetirementCalculator> {
+class _RetirementPlanningCalculatorState
+    extends State<RetirementPlanningCalculator> {
   final _currentAgeController = TextEditingController();
   final _retirementAgeController = TextEditingController();
   final _lifeExpectancyController = TextEditingController();
@@ -36,26 +21,30 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
   final _postReturnController = TextEditingController();
   final _existingFundController = TextEditingController();
 
-  double _currentAge = 27;
-  double _retirementAge = 60;
-  double _lifeExpectancy = 80;
-  double _monthlyIncomeRequired = 100000;
+  int _currentAge = 30;
+  int _retirementAge = 60;
+  int _lifeExpectancy = 85;
+  double _monthlyIncome = 50000;
   double _inflationRate = 6;
   double _preRetirementReturn = 12;
   double _postRetirementReturn = 8;
-  double _existingFund = 100000;
+  double _existingFund = 500000;
 
-  double _annualIncomeRequired = 0;
-  double _totalCorpusRequired = 0;
-  double _monthlySavingsRequired = 0;
+  // Calculated values
+  double _corpusRequired = 0;
+  double _monthlyInvestmentNeeded = 0;
+  double _existingFundGrowth = 0;
+  double _totalInvestmentNeeded = 0;
+  int _yearsToRetirement = 0;
+  int _retirementYears = 0;
 
   @override
   void initState() {
     super.initState();
-    _currentAgeController.text = _currentAge.toStringAsFixed(0);
-    _retirementAgeController.text = _retirementAge.toStringAsFixed(0);
-    _lifeExpectancyController.text = _lifeExpectancy.toStringAsFixed(0);
-    _monthlyIncomeController.text = _monthlyIncomeRequired.toStringAsFixed(0);
+    _currentAgeController.text = _currentAge.toString();
+    _retirementAgeController.text = _retirementAge.toString();
+    _lifeExpectancyController.text = _lifeExpectancy.toString();
+    _monthlyIncomeController.text = _monthlyIncome.toStringAsFixed(0);
     _inflationRateController.text = _inflationRate.toStringAsFixed(1);
     _preReturnController.text = _preRetirementReturn.toStringAsFixed(1);
     _postReturnController.text = _postRetirementReturn.toStringAsFixed(1);
@@ -64,72 +53,124 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
   }
 
   void _calculate() {
-    int yearsToRetirement = (_retirementAge - _currentAge).toInt();
-    int yearsInRetirement = (_lifeExpectancy - _retirementAge).toInt();
+    _yearsToRetirement = _retirementAge - _currentAge;
+    _retirementYears = _lifeExpectancy - _retirementAge;
 
-    if (yearsToRetirement <= 0 || yearsInRetirement <= 0) {
-      setState(() {
-        _annualIncomeRequired = 0;
-        _totalCorpusRequired = 0;
-        _monthlySavingsRequired = 0;
-      });
+    if (_yearsToRetirement <= 0 || _retirementYears <= 0) {
+      _corpusRequired = 0;
+      _monthlyInvestmentNeeded = 0;
+      _existingFundGrowth = 0;
+      _totalInvestmentNeeded = 0;
+      setState(() {});
       return;
     }
 
-    // Calculate future value of monthly income at retirement (adjusted for inflation)
-    double futureMonthlyIncome =
-        _monthlyIncomeRequired *
-        pow(1 + _inflationRate / 100, yearsToRetirement);
+    // Calculate monthly income needed at retirement (adjusted for inflation)
+    double monthlyIncomeAtRetirement =
+        _monthlyIncome * pow(1 + _inflationRate / 100, _yearsToRetirement);
 
-    _annualIncomeRequired = futureMonthlyIncome * 12;
+    // Calculate corpus required at retirement
+    // Using present value of annuity formula considering post-retirement returns and inflation
+    double realReturn = ((_postRetirementReturn - _inflationRate) / 100);
+    double monthlyRealReturn = realReturn / 12;
+    int totalMonths = _retirementYears * 12;
 
-    // Calculate corpus required at retirement using present value of annuity formula
-    // This corpus should generate the required income for retirement years
-    double r = _postRetirementReturn / 100;
-    double g = _inflationRate / 100;
-    double n = yearsInRetirement.toDouble();
-
-    // Using growing annuity formula: PV = PMT * [(1 - ((1+g)/(1+r))^n) / (r - g)]
-    if ((r - g).abs() < 0.0001) {
-      _totalCorpusRequired = _annualIncomeRequired * n / (1 + r);
+    if (monthlyRealReturn == 0) {
+      _corpusRequired = monthlyIncomeAtRetirement * totalMonths;
     } else {
-      _totalCorpusRequired =
-          _annualIncomeRequired * (1 - pow((1 + g) / (1 + r), n)) / (r - g);
+      _corpusRequired =
+          monthlyIncomeAtRetirement *
+          ((1 - pow(1 + monthlyRealReturn, -totalMonths)) / monthlyRealReturn);
     }
 
-    // Adjust for existing fund (grow it to retirement)
-    double existingFundAtRetirement =
-        _existingFund * pow(1 + _preRetirementReturn / 100, yearsToRetirement);
+    // Calculate growth of existing fund
+    _existingFundGrowth =
+        _existingFund * pow(1 + _preRetirementReturn / 100, _yearsToRetirement);
 
-    // Corpus needed from new investments
-    double corpusFromNewInvestments =
-        _totalCorpusRequired - existingFundAtRetirement;
+    // Calculate additional corpus needed
+    double additionalCorpusNeeded = _corpusRequired - _existingFundGrowth;
 
-    if (corpusFromNewInvestments < 0) corpusFromNewInvestments = 0;
-
-    // Calculate monthly SIP required using future value of annuity formula
-    // FV = PMT * [((1+r)^n - 1) / r] * (1+r)
-    double monthlyRate = _preRetirementReturn / 100 / 12;
-    int totalMonths = yearsToRetirement * 12;
-
-    if (monthlyRate == 0) {
-      _monthlySavingsRequired = corpusFromNewInvestments / totalMonths;
+    if (additionalCorpusNeeded <= 0) {
+      _monthlyInvestmentNeeded = 0;
+      _totalInvestmentNeeded = 0;
     } else {
-      _monthlySavingsRequired =
-          corpusFromNewInvestments *
-          monthlyRate /
-          ((pow(1 + monthlyRate, totalMonths) - 1) * (1 + monthlyRate));
+      // Calculate monthly investment needed using future value of annuity formula
+      double monthlyRate = _preRetirementReturn / 12 / 100;
+      int months = _yearsToRetirement * 12;
+
+      if (monthlyRate == 0) {
+        _monthlyInvestmentNeeded = additionalCorpusNeeded / months;
+      } else {
+        _monthlyInvestmentNeeded =
+            additionalCorpusNeeded /
+            (((pow(1 + monthlyRate, months) - 1) / monthlyRate) *
+                (1 + monthlyRate));
+      }
+
+      _totalInvestmentNeeded = _monthlyInvestmentNeeded * months;
     }
 
     setState(() {});
+  }
+
+  List<Map<String, dynamic>> _getYearlyBreakdown() {
+    List<Map<String, dynamic>> breakdown = [];
+    double balance = _existingFund;
+    double currentMonthlyIncome = _monthlyIncome;
+
+    // Pre-retirement phase
+    for (int year = 0; year < _yearsToRetirement; year++) {
+      int age = _currentAge + year;
+      double yearlyInvestment = _monthlyInvestmentNeeded * 12;
+      double returns = balance * (_preRetirementReturn / 100);
+
+      balance += yearlyInvestment + returns;
+      currentMonthlyIncome = currentMonthlyIncome * (1 + _inflationRate / 100);
+
+      breakdown.add({
+        'year': year + 1,
+        'age': age,
+        'phase': 'Accumulation',
+        'investment': yearlyInvestment,
+        'returns': returns,
+        'balance': balance,
+        'withdrawal': 0.0,
+        'monthlyIncome': currentMonthlyIncome,
+      });
+    }
+
+    // Post-retirement phase
+    for (int year = 0; year < min(_retirementYears, 30); year++) {
+      int age = _retirementAge + year;
+      double yearlyWithdrawal = currentMonthlyIncome * 12;
+      double returns = balance * (_postRetirementReturn / 100);
+
+      balance = balance + returns - yearlyWithdrawal;
+      currentMonthlyIncome = currentMonthlyIncome * (1 + _inflationRate / 100);
+
+      if (balance < 0) balance = 0;
+
+      breakdown.add({
+        'year': _yearsToRetirement + year + 1,
+        'age': age,
+        'phase': 'Withdrawal',
+        'investment': 0.0,
+        'returns': returns,
+        'balance': balance,
+        'withdrawal': yearlyWithdrawal,
+        'monthlyIncome': currentMonthlyIncome,
+      });
+    }
+
+    return breakdown;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Retirement Planning Calculator'),
-        backgroundColor: Colors.teal.shade700,
+        title: const Text('Retirement Planning'),
+        backgroundColor: Colors.deepPurple.shade600,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -142,15 +183,13 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDescriptionCard(),
-                  const SizedBox(height: 20),
                   _buildInputCard(),
                   const SizedBox(height: 20),
-                  _buildCalculateButton(),
+                  _buildResultsCard(),
                   const SizedBox(height: 20),
-                  _buildResultCard(),
+                  _buildBreakdownCard(),
                   const SizedBox(height: 20),
-                  _buildChartCard(),
+                  _buildYearlyTable(),
                 ],
               ),
             ),
@@ -166,45 +205,33 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.teal.shade700, Colors.teal.shade500],
+          colors: [Colors.deepPurple.shade600, Colors.deepPurple.shade400],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
       child: Column(
         children: [
-          const Icon(Icons.account_balance, size: 70, color: Colors.white),
-          const SizedBox(height: 20),
+          const Icon(Icons.elderly_rounded, size: 70, color: Colors.white),
+          const SizedBox(height: 16),
           const Text(
             'Retirement Planning Calculator',
-            textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Plan your golden years with confidence',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 16,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDescriptionCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.teal.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.teal.shade200),
-      ),
-      child: Text(
-        'Estimate your Retirement Corpus based on your expenses & the monthly investment required to achieve it.',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.teal.shade900,
-          height: 1.5,
-        ),
-        textAlign: TextAlign.center,
       ),
     );
   }
@@ -226,57 +253,65 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'Input Details',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
           _buildSliderInput(
             label: 'Current Age',
-            value: _currentAge,
+            value: _currentAge.toDouble(),
             min: 18,
-            max: 80,
-            divisions: 62,
+            max: 65,
+            divisions: 47,
             suffix: ' Years',
             controller: _currentAgeController,
             onChanged: (val) {
               setState(() {
-                _currentAge = val;
-                _currentAgeController.text = val.toStringAsFixed(0);
+                _currentAge = val.toInt();
+                _currentAgeController.text = val.toInt().toString();
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
             label: 'Desired Retirement Age',
-            value: _retirementAge,
-            min: 40,
-            max: 80,
-            divisions: 40,
+            value: _retirementAge.toDouble(),
+            min: max(_currentAge + 1, 40).toDouble(),
+            max: 75,
+            divisions: max(1, 75 - max(_currentAge + 1, 40)),
             suffix: ' Years',
             controller: _retirementAgeController,
             onChanged: (val) {
               setState(() {
-                _retirementAge = val;
-                _retirementAgeController.text = val.toStringAsFixed(0);
+                _retirementAge = val.toInt();
+                _retirementAgeController.text = val.toInt().toString();
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
             label: 'Life Expectancy',
-            value: _lifeExpectancy,
-            min: 60,
+            value: _lifeExpectancy.toDouble(),
+            min: max(_retirementAge + 1, 65).toDouble(),
             max: 100,
-            divisions: 40,
+            divisions: max(1, 100 - max(_retirementAge + 1, 65)),
             suffix: ' Years',
             controller: _lifeExpectancyController,
             onChanged: (val) {
               setState(() {
-                _lifeExpectancy = val;
-                _lifeExpectancyController.text = val.toStringAsFixed(0);
+                _lifeExpectancy = val.toInt();
+                _lifeExpectancyController.text = val.toInt().toString();
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Monthly Income Required in Retirement Years',
-            value: _monthlyIncomeRequired,
+            label: 'Monthly Income Required in Retirement',
+            value: _monthlyIncome,
             min: 10000,
             max: 500000,
             divisions: 490,
@@ -284,56 +319,60 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
             controller: _monthlyIncomeController,
             onChanged: (val) {
               setState(() {
-                _monthlyIncomeRequired = val;
+                _monthlyIncome = val;
                 _monthlyIncomeController.text = val.toStringAsFixed(0);
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Expected Inflation Rate (%)',
+            label: 'Expected Inflation Rate',
             value: _inflationRate,
-            min: 0,
+            min: 2,
             max: 15,
-            divisions: 150,
-            suffix: ' %',
+            divisions: 130,
+            suffix: '%',
             controller: _inflationRateController,
             onChanged: (val) {
               setState(() {
                 _inflationRate = val;
                 _inflationRateController.text = val.toStringAsFixed(1);
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Expected Return on Investment (Pre-retirement)',
+            label: 'Expected Return (Pre-retirement)',
             value: _preRetirementReturn,
-            min: 0,
+            min: 4,
             max: 20,
-            divisions: 200,
-            suffix: ' %',
+            divisions: 160,
+            suffix: '%',
             controller: _preReturnController,
             onChanged: (val) {
               setState(() {
                 _preRetirementReturn = val;
                 _preReturnController.text = val.toStringAsFixed(1);
+                _calculate();
               });
             },
           ),
           const SizedBox(height: 24),
           _buildSliderInput(
-            label: 'Expected Return on Investment (Post-retirement)',
+            label: 'Expected Return (Post-retirement)',
             value: _postRetirementReturn,
-            min: 0,
+            min: 3,
             max: 15,
-            divisions: 150,
-            suffix: ' %',
+            divisions: 120,
+            suffix: '%',
             controller: _postReturnController,
             onChanged: (val) {
               setState(() {
                 _postRetirementReturn = val;
                 _postReturnController.text = val.toStringAsFixed(1);
+                _calculate();
               });
             },
           ),
@@ -350,6 +389,7 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
               setState(() {
                 _existingFund = val;
                 _existingFundController.text = val.toStringAsFixed(0);
+                _calculate();
               });
             },
           ),
@@ -379,7 +419,7 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   color: Colors.grey.shade700,
                   fontWeight: FontWeight.w600,
                 ),
@@ -403,26 +443,33 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 8,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
+                  color: Colors.deepPurple.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.teal.shade200, width: 1.5),
+                  border: Border.all(
+                    color: Colors.deepPurple.shade200,
+                    width: 1.5,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$prefix${value >= 1000 ? value.toStringAsFixed(0) : value.toStringAsFixed(1)}$suffix',
+                      '$prefix${value.toStringAsFixed(suffix == '%' || suffix.contains('Year') ? (suffix.contains('Year') ? 0 : 1) : 0)}$suffix',
                       style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.teal.shade700,
+                        fontSize: 16,
+                        color: Colors.deepPurple.shade700,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Icon(Icons.edit, size: 14, color: Colors.teal.shade700),
+                    Icon(
+                      Icons.edit,
+                      size: 16,
+                      color: Colors.deepPurple.shade700,
+                    ),
                   ],
                 ),
               ),
@@ -432,12 +479,12 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
         const SizedBox(height: 12),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: Colors.teal.shade600,
-            inactiveTrackColor: Colors.teal.shade100,
-            thumbColor: Colors.teal.shade700,
-            overlayColor: Colors.teal.shade100,
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+            activeTrackColor: Colors.deepPurple.shade600,
+            inactiveTrackColor: Colors.deepPurple.shade100,
+            thumbColor: Colors.deepPurple.shade700,
+            overlayColor: Colors.deepPurple.shade100,
+            trackHeight: 6,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
           ),
           child: Slider(
             value: value,
@@ -445,9 +492,7 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
             max: max,
             divisions: divisions,
             onChanged: (val) {
-              controller.text = val >= 1000
-                  ? val.toStringAsFixed(0)
-                  : val.toStringAsFixed(1);
+              controller.text = val.toStringAsFixed(suffix == '%' ? 1 : 0);
               onChanged(val);
             },
           ),
@@ -482,10 +527,12 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.teal.shade700, width: 2),
+              borderSide: BorderSide(
+                color: Colors.deepPurple.shade600,
+                width: 2,
+              ),
             ),
-            hintText:
-                'Min: ${min.toStringAsFixed(0)}, Max: ${max.toStringAsFixed(0)}',
+            hintText: 'Enter value',
           ),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
@@ -504,19 +551,10 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
                 controller.text = tempController.text;
                 onSave(value);
                 Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Please enter a value between ${min.toStringAsFixed(0)} and ${max.toStringAsFixed(0)}',
-                    ),
-                    backgroundColor: Colors.red.shade400,
-                  ),
-                );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal.shade700,
+              backgroundColor: Colors.deepPurple.shade600,
               foregroundColor: Colors.white,
             ),
             child: const Text('Save'),
@@ -526,135 +564,7 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
     );
   }
 
-  Widget _buildCalculateButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: _calculate,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal.shade700,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-        ),
-        child: const Text(
-          'Calculate',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.teal.shade700, Colors.teal.shade500],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                const Text(
-                  'Total Corpus Required For After Retirement',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '₹${(_totalCorpusRequired / 10000000).toStringAsFixed(2)} Crore',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoBox(
-                  'Annual Income Required Immediately After Retirement',
-                  '₹${(_annualIncomeRequired / 100000).toStringAsFixed(2)} Lakh',
-                  Colors.teal,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoBox(
-                  'Monthly Savings Required To Accumulate The Corpus',
-                  '₹${_monthlySavingsRequired.toStringAsFixed(0)}',
-                  Colors.orange,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoBox(String title, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey.shade700,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.teal.shade700,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChartCard() {
+  Widget _buildResultsCard() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -672,117 +582,331 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Corpus Breakdown',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 250,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: CustomPaint(
-                    painter: BarChartPainter(
-                      annualIncome: _annualIncomeRequired,
-                      totalCorpus: _totalCorpusRequired,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLegendItem(
-                        'Annual Income Required Immediately After Retirement',
-                        Colors.teal.shade600,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildLegendItem(
-                        'Total Corpus Required For After Retirement',
-                        Colors.orange.shade600,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            'Results',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.teal.shade600,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '₹${(_annualIncomeRequired / 100000).toStringAsFixed(2)} Lakh',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal.shade700,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade600,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '₹${(_totalCorpusRequired / 10000000).toStringAsFixed(2)} Crore',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          _buildResultRow(
+            'Retirement Corpus Required',
+            formatToIndianUnits(_corpusRequired),
+            Colors.deepPurple,
+            Icons.account_balance,
+          ),
+          const SizedBox(height: 16),
+          _buildResultRow(
+            'Existing Fund Growth',
+            formatToIndianUnits(_existingFundGrowth),
+            Colors.green,
+            Icons.trending_up,
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 16),
+          _buildResultRow(
+            'Monthly Investment Needed',
+            '₹${_monthlyInvestmentNeeded.toStringAsFixed(0)}',
+            Colors.orange,
+            Icons.savings,
+            isHighlight: true,
+          ),
+          const SizedBox(height: 16),
+          _buildResultRow(
+            'Total Investment Needed',
+            formatToIndianUnits(_totalInvestmentNeeded),
+            Colors.blue,
+            Icons.account_balance_wallet,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildResultRow(
+    String label,
+    String value,
+    Color color,
+    IconData icon, {
+    bool isHighlight = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlight ? color.withValues(alpha: 0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        border: isHighlight ? Border.all(color: color, width: 2) : null,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: isHighlight ? 22 : 18,
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBreakdownCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Planning Summary',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          _buildInfoRow(
+            'Years to Retirement',
+            '$_yearsToRetirement years',
+            Icons.work,
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'Retirement Duration',
+            '$_retirementYears years',
+            Icons.elderly,
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'Pre-retirement Returns',
+            '${_preRetirementReturn.toStringAsFixed(1)}% p.a.',
+            Icons.trending_up,
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'Post-retirement Returns',
+            '${_postRetirementReturn.toStringAsFixed(1)}% p.a.',
+            Icons.trending_down,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, IconData icon) {
     return Row(
       children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 8),
+        Icon(icon, size: 20, color: Colors.deepPurple.shade600),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade700),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.deepPurple.shade700,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildYearlyTable() {
+    final breakdown = _getYearlyBreakdown();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Year-wise Projection',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'First 30 years shown',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 20),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              headingRowColor: WidgetStateProperty.all(
+                Colors.deepPurple.shade50,
+              ),
+              border: TableBorder.all(color: Colors.grey.shade300, width: 1),
+              columnSpacing: 15,
+              columns: const [
+                DataColumn(
+                  label: Text(
+                    'Year',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Age',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Phase',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Investment',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Returns',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Withdrawal',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Balance',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                ),
+              ],
+              rows: breakdown.take(30).map((row) {
+                bool isRetirementYear = row['age'] == _retirementAge;
+                return DataRow(
+                  color: isRetirementYear
+                      ? WidgetStateProperty.all(Colors.orange.shade50)
+                      : null,
+                  cells: [
+                    DataCell(
+                      Text(
+                        '${row['year']}',
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '${row['age']}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isRetirementYear
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '${row['phase']}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: row['phase'] == 'Accumulation'
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '₹${(row['investment']).toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '₹${(row['returns']).toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '₹${(row['withdrawal']).toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        '₹${(row['balance'] / 100000).toStringAsFixed(1)}L',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -798,57 +922,4 @@ class _RetirementCalculatorState extends State<RetirementCalculator> {
     _existingFundController.dispose();
     super.dispose();
   }
-}
-
-class BarChartPainter extends CustomPainter {
-  final double annualIncome;
-  final double totalCorpus;
-
-  BarChartPainter({required this.annualIncome, required this.totalCorpus});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final maxValue = max(annualIncome, totalCorpus);
-    if (maxValue == 0) return;
-
-    final barWidth = size.width / 3;
-    final spacing = barWidth / 2;
-
-    // Draw Annual Income bar
-    final annualIncomeHeight = (annualIncome / maxValue) * (size.height - 40);
-    final annualIncomePaint = Paint()
-      ..color = Colors.teal.shade600
-      ..style = PaintingStyle.fill;
-
-    final annualIncomeRect = Rect.fromLTWH(
-      spacing / 2,
-      size.height - annualIncomeHeight - 20,
-      barWidth,
-      annualIncomeHeight,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(annualIncomeRect, const Radius.circular(8)),
-      annualIncomePaint,
-    );
-
-    // Draw Total Corpus bar
-    final totalCorpusHeight = (totalCorpus / maxValue) * (size.height - 40);
-    final totalCorpusPaint = Paint()
-      ..color = Colors.orange.shade600
-      ..style = PaintingStyle.fill;
-
-    final totalCorpusRect = Rect.fromLTWH(
-      spacing / 2 + barWidth + spacing,
-      size.height - totalCorpusHeight - 20,
-      barWidth,
-      totalCorpusHeight,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(totalCorpusRect, const Radius.circular(8)),
-      totalCorpusPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

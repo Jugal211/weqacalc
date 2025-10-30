@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
 class SIPCalculator extends StatefulWidget {
   const SIPCalculator({super.key});
@@ -553,7 +554,7 @@ class _SIPCalculatorState extends State<SIPCalculator> {
           ),
           const SizedBox(height: 4),
           Text(
-            '₹${(amount / 100000).toStringAsFixed(1)}L',
+            formatToIndianUnits(amount),
             style: TextStyle(
               fontSize: 16,
               color: color,
@@ -720,7 +721,7 @@ class _SIPCalculatorState extends State<SIPCalculator> {
           ),
         ),
         Text(
-          '₹${(amount / 100000).toStringAsFixed(1)}L',
+          formatToIndianUnits(amount),
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
       ],

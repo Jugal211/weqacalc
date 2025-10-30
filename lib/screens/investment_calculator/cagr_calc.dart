@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
 class CAGRCalculator extends StatefulWidget {
   const CAGRCalculator({super.key});
@@ -467,7 +468,7 @@ class _CAGRCalculatorState extends State<CAGRCalculator> {
           ),
           const SizedBox(height: 4),
           Text(
-            '₹${(amount / 100000).toStringAsFixed(1)}L',
+            formatToIndianUnits(amount),
             style: TextStyle(
               fontSize: 16,
               color: color,

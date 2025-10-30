@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/utils/utils.dart';
 
 class CompoundInterestCalculator extends StatefulWidget {
   const CompoundInterestCalculator({super.key});
@@ -599,7 +600,7 @@ class _CompoundInterestCalculatorState
           ),
           const SizedBox(height: 4),
           Text(
-            '₹${(amount / 100000).toStringAsFixed(1)}L',
+            formatToIndianUnits(amount),
             style: TextStyle(
               fontSize: 16,
               color: color,
@@ -711,7 +712,7 @@ class _CompoundInterestCalculatorState
           ),
         ),
         Text(
-          '₹${(amount / 100000).toStringAsFixed(1)}L',
+          formatToIndianUnits(amount),
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
       ],

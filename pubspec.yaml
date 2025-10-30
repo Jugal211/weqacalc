@@ -1,7 +1,7 @@
 name: weqacalc
-description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+description: "WeqaCalc is a comprehensive financial calculator app for investments, loans, and retirement planning."
+publish_to: 'none' # This ensures your package is not accidentally published to pub.dev
+version: 1.0.0+1 # Major.Minor.Patch+Build Number
 
 environment:
   sdk: ^3.9.2
@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:

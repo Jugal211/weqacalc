@@ -126,7 +126,7 @@ List<CalculatorItem> getFilteredCalculators(
       icon: Icons.elderly_rounded,
       gradient: [Color(0xFF607D8B), Color(0xFF455A64)],
       category: 'Retirement',
-      route: const RetirementCalculator(),
+      route: const RetirementPlanningCalculator(),
     ),
     CalculatorItem(
       title: 'FIRE Calculator',

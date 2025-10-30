@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:weqacalc/widgets/about.dart' as about;
 
 Widget buildSettingOption(
@@ -43,6 +44,13 @@ Widget buildSettingOption(
 
 class SettingsBottomSheet extends StatelessWidget {
   const SettingsBottomSheet({super.key});
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +132,9 @@ class SettingsBottomSheet extends StatelessWidget {
               Icons.privacy_tip_outlined,
               () {
                 Navigator.pop(context);
+                _launchUrl(
+                  'https://github.com/Jugal211/weqacalc/blob/main/PRIVACY_POLICY.md',
+                );
               },
             ),
             SizedBox(height: 16),
