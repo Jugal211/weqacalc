@@ -766,21 +766,19 @@ class _FIRECalculatorState extends State<FIRECalculator> {
             ),
           ),
           const SizedBox(height: 12),
-          ...points
-              .map(
-                (point) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    point,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade800,
-                      height: 1.4,
-                    ),
-                  ),
+          ...points.map(
+            (point) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                point,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade800,
+                  height: 1.4,
                 ),
-              )
-              .toList(),
+              ),
+            ),
+          ),
         ],
       ),
     );
