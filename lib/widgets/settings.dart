@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weqacalc/widgets/about.dart' as about;
+import 'package:share_plus/share_plus.dart';
 
 Widget buildSettingOption(
   BuildContext context,
@@ -107,23 +108,36 @@ class SettingsBottomSheet extends StatelessWidget {
               context,
               'Rate Us',
               Icons.star_outline_rounded,
-              () {
+              () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Thank you for your support!'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+
+                // Replace with your actual Play Store link
+                const playStoreUrl =
+                    'https://play.google.com/store/apps/details?id=com.wefin.calculator';
+
+                try {
+                  await _launchUrl(playStoreUrl);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Unable to open Play Store.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
             ),
-            buildSettingOption(context, 'Share App', Icons.share_rounded, () {
+            buildSettingOption(context, 'Share App', Icons.share_rounded, () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Share feature coming soon!'),
-                  backgroundColor: Colors.blue,
-                ),
+
+              const appLink =
+                  'https://play.google.com/store/apps/details?id=com.wefin.calculator';
+
+              await Share.share(
+                '📱 Check out WeFin Calculator – your path to financial independence!\n$appLink',
+                subject: 'WeFin Calculator',
               );
             }),
             buildSettingOption(
