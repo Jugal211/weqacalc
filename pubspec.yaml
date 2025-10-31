@@ -1,7 +1,7 @@
 name: weqacalc
 description: "WeqaCalc is a comprehensive financial calculator app for investments, loans, and retirement planning."
 publish_to: 'none' # This ensures your package is not accidentally published to pub.dev
-version: 1.0.0+1 # Major.Minor.Patch+Build Number
+version: 1.0.0+2 # v1.0.0, build 2
 
 environment:
   sdk: ^3.9.2
