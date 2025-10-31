@@ -1,6 +1,6 @@
-# WeqaCalc - Your All-in-One Financial Calculator
+# WeFin Calculator - Your All-in-One Financial Calculator
 
-WeqaCalc is a comprehensive Flutter-based financial calculator application designed to help users manage their finances effectively. It provides various calculators for investments, loans, and retirement planning, all within a user-friendly interface.
+WeFin Calculator is a comprehensive Flutter-based financial calculator application designed to help users manage their finances effectively. It provides various calculators for investments, loans, and retirement planning, all within a user-friendly interface.
 
 ## Table of Contents
 
