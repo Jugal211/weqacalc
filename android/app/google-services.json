@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "149009916741",
+    "project_id": "wefin-calculator",
+    "storage_bucket": "wefin-calculator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149009916741:android:e1754e20f75b04afa3542c",
+        "android_client_info": {
+          "package_name": "com.wefin.calculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyNfuzxjbYFFaiVugMTHMLdYwiWhwMvzY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
