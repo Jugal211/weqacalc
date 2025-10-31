@@ -133,7 +133,7 @@ class SettingsBottomSheet extends StatelessWidget {
               () {
                 Navigator.pop(context);
                 _launchUrl(
-                  'https://raw.githubusercontent.com/Jugal211/weqacalc/refs/heads/main/PRIVACY_POLICY.md',
+                  'https://jugal211.github.io/weqacalc/privacy-policy.html',
                 );
               },
             ),
