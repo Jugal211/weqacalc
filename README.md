@@ -128,7 +128,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Privacy Policy
 
-We are committed to protecting your privacy. Please read our [Privacy Policy](PRIVACY_POLICY.md) to understand how we handle your data.
+We are committed to protecting your privacy. Please read our [Privacy Policy](privacy-policy.html) to understand how we handle your data.
 
 ---
 
