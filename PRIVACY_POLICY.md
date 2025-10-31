@@ -1,12 +1,12 @@
-# Privacy Policy for WeqaCalc
+# Privacy Policy for WeFin Calculator
 
 **Last Updated: October 29, 2025**
 
-WeqaCalc ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we handle information when you use our WeqaCalc mobile application (the "Service").
+WeFin Calculator ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we handle information when you use our WeqaCalc mobile application (the "Service").
 
 ## 1. Information We Do Not Collect
 
-We want to be clear: **WeqaCalc does not collect, store, or transmit any personally identifiable information (PII) or sensitive user data.** This includes, but is not limited to:
+We want to be clear: **WeFin Calculator does not collect, store, or transmit any personally identifiable information (PII) or sensitive user data.** This includes, but is not limited to:
 
 *   **Personal Identifiable Information:** We do not ask for your name, email address, phone number, or any other information that could identify you.
 *   **Financial Data:** All financial calculations and data you input (e.g., loan amounts, interest rates, investment figures, retirement goals) are processed *locally on your device only*. This data is never sent to our servers, stored in any external database, or shared with any third party.
@@ -20,7 +20,7 @@ Since we do not collect any personal or sensitive information from our users, **
 
 ## 3. Permissions
 
-The WeqaCalc application is designed to function without requiring any intrusive permissions. It does not request or access:
+The WeFin Calculator application is designed to function without requiring any intrusive permissions. It does not request or access:
 
 *   Your contacts
 *   Your camera or microphone
@@ -31,7 +31,7 @@ The WeqaCalc application is designed to function without requiring any intrusive
 
 ## 4. Third-Party Services
 
-WeqaCalc does not integrate with any third-party analytics, advertising, or other services that would collect information from you. Our commitment is to provide a purely local and private calculator experience.
+WeFin Calculator does not integrate with any third-party analytics, advertising, or other services that would collect information from you. Our commitment is to provide a purely local and private calculator experience.
 
 ## 5. Data Security
 
@@ -39,7 +39,7 @@ While we do not collect or store your data, we are committed to ensuring that th
 
 ## 6. Children's Privacy
 
-WeqaCalc is not intended for use by children under the age of 13, and we do not knowingly collect any personal information from children under 13. If we become aware that we have inadvertently received personal information from a child under 13, we will delete such information from our records.
+WeFin Calculator is not intended for use by children under the age of 13, and we do not knowingly collect any personal information from children under 13. If we become aware that we have inadvertently received personal information from a child under 13, we will delete such information from our records.
 
 ## 7. Changes to This Privacy Policy
 
