@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class LoanPrepaymentCalculator extends StatefulWidget {
   const LoanPrepaymentCalculator({super.key});
@@ -34,6 +36,9 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
   double _totalSavings = 0;
   int _timeSaved = 0;
 
+  // Financial health score
+  FinancialHealthScore? _healthScore;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +54,17 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
     _calculateRegularLoan();
     _calculatePrepaymentLoan();
     _calculateSavings();
+
+    // Calculate health score - assuming 100000 monthly income
+    const estimatedMonthlyIncome = 100000.0;
+    _healthScore = FinancialHealthScoreService.calculateForLoanPrepayment(
+      monthlyEMI: _prepaymentEMI,
+      extraPayment: _extraPaymentPerYear / 12,
+      loanAmount: _loanAmount,
+      estimatedMonthlyIncome: estimatedMonthlyIncome,
+      calculatorsUsed: 1,
+    );
+
     setState(() {});
   }
 
@@ -122,7 +138,6 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
     double balance = _loanAmount;
     double monthlyRate = _interestRate / 12 / 100;
     double currentEMI = _regularEMI;
-    int monthsPassed = 0;
 
     for (int year = 1; year <= _loanTenure && balance > 0; year++) {
       double yearlyPrincipal = 0;
@@ -146,7 +161,6 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
         yearlyPrincipal += principal;
         yearlyInterest += interest;
         yearlyEMI += currentEMI;
-        monthsPassed++;
       }
 
       // Add extra payment at end of year
@@ -197,6 +211,10 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
                   const SizedBox(height: 20),
                   _buildSavingsCard(),
                   const SizedBox(height: 20),
+                  if (_healthScore != null) ...[
+                    FinancialHealthScoreCard(score: _healthScore!),
+                    const SizedBox(height: 20),
+                  ],
                   _buildYearlyBreakdown(),
                 ],
               ),

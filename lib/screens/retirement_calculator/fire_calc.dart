@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:provider/provider.dart';
+import 'package:weqacalc/services/achievement_service.dart';
+import 'package:weqacalc/widgets/achievement_badge.dart';
+import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class FIRECalculator extends StatefulWidget {
   const FIRECalculator({super.key});
@@ -102,7 +107,31 @@ class _FIRECalculatorState extends State<FIRECalculator> {
       _coastFIRE = 0;
     }
 
+    // Unlock achievements
+    _checkAndUnlockAchievements();
+
     setState(() {});
+  }
+
+  void _checkAndUnlockAchievements() {
+    final achievementService = context.read<AchievementService>();
+
+    // Fire goal reached
+    if (!achievementService.isAchievementUnlocked('fire_goal_reached')) {
+      achievementService.unlockAchievement('fire_goal_reached');
+    }
+
+    // Early retirement (before 45)
+    if (_retirementAge < 45 &&
+        !achievementService.isAchievementUnlocked('early_retirement')) {
+      achievementService.unlockAchievement('early_retirement');
+    }
+
+    // Crore milestone
+    if (_traditionalFIRE >= 10000000 &&
+        !achievementService.isAchievementUnlocked('crore_milestone')) {
+      achievementService.unlockAchievement('crore_milestone');
+    }
   }
 
   @override
@@ -126,6 +155,10 @@ class _FIRECalculatorState extends State<FIRECalculator> {
                   _buildInputCard(),
                   const SizedBox(height: 20),
                   _buildOutputCard(),
+                  const SizedBox(height: 20),
+                  _buildFinancialHealthCard(),
+                  const SizedBox(height: 20),
+                  _buildAchievementsCard(),
                   const SizedBox(height: 20),
                   _buildFIRETypesInfo(),
                 ],
@@ -781,6 +814,60 @@ class _FIRECalculatorState extends State<FIRECalculator> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAchievementsCard() {
+    return Consumer<AchievementService>(
+      builder: (context, achievementService, _) {
+        final unlockedAchievements = achievementService.unlockedAchievements;
+
+        if (unlockedAchievements.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return AchievementsSection(
+          achievements: unlockedAchievements,
+          title: 'Your Achievements',
+        );
+      },
+    );
+  }
+
+  Widget _buildFinancialHealthCard() {
+    // Calculate based on current inputs
+    // For FIRE calculator, we estimate based on retirement corpus and goals
+    // Assume monthly income based on expense ratio
+    double estimatedMonthlyIncome =
+        _monthlyExpense * 3; // Conservative estimate
+    double estimatedMonthlySavings =
+        _monthlyExpense * 0.5; // Assume 50% savings
+    double estimatedInvestment = _traditionalFIRE > 0
+        ? 100000
+        : 0; // Has investment goal
+    double estimatedLoan = 0; // FIRE calculator doesn't track debt
+    bool hasEmergencyFund =
+        _monthlyExpense > 0; // Using calculator implies planning
+
+    final healthScore = FinancialHealthScoreService.calculateScore(
+      monthlyIncome: estimatedMonthlyIncome,
+      monthlySavings: estimatedMonthlySavings,
+      investmentAmount: estimatedInvestment,
+      loanAmount: estimatedLoan,
+      hasEmergencyFund: hasEmergencyFund,
+      calculatorsUsed: 1, // Using FIRE calculator
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Financial Health',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        FinancialHealthScoreCard(score: healthScore),
+      ],
     );
   }
 

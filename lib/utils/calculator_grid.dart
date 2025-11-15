@@ -171,20 +171,24 @@ Widget buildCalculatorGrid(
             ),
           ),
         ),
-        Expanded(
-          child: GridView.builder(
-            padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: calculators.length,
-            itemBuilder: (context, index) {
-              return buildCalculatorCard(context, calculators[index], index);
-            },
+        // When this grid is placed inside a vertical scrollable (e.g. the
+        // home screen's SingleChildScrollView), the GridView must not try to
+        // expand to fill an unbounded height. Use shrinkWrap and disable the
+        // GridView's own scrolling so the outer scroll view controls scrolling.
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.85,
           ),
+          itemCount: calculators.length,
+          itemBuilder: (context, index) {
+            return buildCalculatorCard(context, calculators[index], index);
+          },
         ),
       ],
     ),

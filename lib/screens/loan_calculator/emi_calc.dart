@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class EMICalculator extends StatefulWidget {
   const EMICalculator({super.key});
@@ -21,6 +23,9 @@ class _EMICalculatorState extends State<EMICalculator> {
   double _monthlyEMI = 0;
   double _totalAmount = 0;
   double _totalInterest = 0;
+
+  // Financial health score
+  FinancialHealthScore? _healthScore;
 
   @override
   void initState() {
@@ -49,6 +54,16 @@ class _EMICalculatorState extends State<EMICalculator> {
     _totalAmount = _monthlyEMI * months;
     _totalInterest = _totalAmount - principal;
 
+    // Calculate health score - assuming 50000 monthly income
+    const estimatedMonthlyIncome = 50000.0;
+    _healthScore = FinancialHealthScoreService.calculateForEMI(
+      monthlyEMI: _monthlyEMI,
+      loanAmount: _loanAmount,
+      loanTenureYears: _loanTenure,
+      estimatedMonthlyIncome: estimatedMonthlyIncome,
+      calculatorsUsed: 1,
+    );
+
     setState(() {});
   }
 
@@ -74,6 +89,10 @@ class _EMICalculatorState extends State<EMICalculator> {
                   const SizedBox(height: 20),
                   _buildResultsCard(),
                   const SizedBox(height: 20),
+                  if (_healthScore != null) ...[
+                    FinancialHealthScoreCard(score: _healthScore!),
+                    const SizedBox(height: 20),
+                  ],
                   _buildBreakdownChart(),
                 ],
               ),

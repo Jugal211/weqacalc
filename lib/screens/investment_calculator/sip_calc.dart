@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class SIPCalculator extends StatefulWidget {
   const SIPCalculator({super.key});
@@ -24,6 +26,9 @@ class _SIPCalculatorState extends State<SIPCalculator> {
   double _estimatedReturns = 0;
   double _totalValue = 0;
 
+  // Financial health score
+  FinancialHealthScore? _healthScore;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +45,15 @@ class _SIPCalculatorState extends State<SIPCalculator> {
     } else {
       _calculateStepUpSIP();
     }
+
+    // Calculate health score
+    _healthScore = FinancialHealthScoreService.calculateForSIP(
+      monthlyInvestment: _monthlyInvestment,
+      timePeriodYears: _timePeriod,
+      hasRegularInvesting: true,
+      calculatorsUsed: 1,
+    );
+
     setState(() {});
   }
 
@@ -150,6 +164,10 @@ class _SIPCalculatorState extends State<SIPCalculator> {
                   const SizedBox(height: 20),
                   _buildSummaryCards(),
                   const SizedBox(height: 20),
+                  if (_healthScore != null) ...[
+                    FinancialHealthScoreCard(score: _healthScore!),
+                    const SizedBox(height: 20),
+                  ],
                   _buildBreakdownChart(),
                   const SizedBox(height: 20),
                   _buildYearlyBreakdown(),
