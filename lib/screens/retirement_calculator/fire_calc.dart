@@ -77,7 +77,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
     // Coast FIRE: Amount needed now at coast age that will grow to Traditional FIRE by retirement
     if (_coastFIREAge > _currentAge && _coastFIREAge <= _retirementAge) {
       int yearsFromNowToCoast = _coastFIREAge - _currentAge;
-      int yearsFromCoastToRetirement = _retirementAge - _coastFIREAge;
+      // int yearsFromCoastToRetirement = _retirementAge - _coastFIREAge;
 
       // Calculate expense at coast age
       double expenseAtCoastAge =
