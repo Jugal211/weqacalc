@@ -1,172 +1,137 @@
+
 # WeFin Calculator (weqacalc)
 
-Smart, production-ready financial calculators with personalized Financial Health scoring, usage tracking, and a referral rewards system.
+WeFin Calculator is a Flutter app that bundles a set of financial calculators (investments, loans, retirement) with:
+
+- A personalized Financial Health Score computed from profile or usage data.
+- Per-calculator usage tracking persisted via `SharedPreferences` (`UserDataService`).
+- A local referral/rewards system (`ReferralService`) with shareable codes and milestone rewards.
+
+This README is an authoritative summary of the codebase, how to run it, architecture notes, and where to make small feature additions.
 
 ---
 
-## Quick summary
-- All hardcoded values removed — calculations use user profile or intelligent fallbacks.
-- Financial Health Score computed from real inputs and dynamic calculator-awareness.
-- Usage tracking for calculators (UserDataService) persisted with SharedPreferences.
-- Referral system with unique codes, local tracking, and reward milestones.
-- Code analysis-clean: `dart analyze` returns no issues in current branch.
+## Quick start
 
----
+Prerequisites: Flutter SDK (matching project's channel) and platform tooling.
 
-## What's included in this repo
-- Multiple calculator screens (investment, loans, retirement).
-- Services: `UserDataService`, `ReferralService`, `FinancialHealthService`, `AchievementService`.
-- Widgets: financial profile dialog, health card, referral rewards UI, settings.
-- Utils: dynamic calculator routing and grid builders.
-- Full documentation consolidated into this README (previous top-level MD files were consolidated).
+1. Install dependencies:
 
----
-
-## Install & run (development)
-
-Prerequisites: Flutter SDK, Android/iOS tooling.
-
-1. Get dependencies:
-
-```bash
+```powershell
 flutter pub get
 ```
 
-2. Run the app (connected device or emulator):
+2. Run on a connected device or emulator:
 
-```bash
+```powershell
 flutter run
 ```
 
-3. Check static analysis:
+3. Verify static analysis:
 
-```bash
+```powershell
 dart analyze
 ```
 
 ---
 
-## Project structure (high-level)
+## High-level layout
 
-lib/
-- main.dart — app initialization and service providers
-- services/ — `user_data_service.dart`, `referral_service.dart`, `financial_health_service.dart`, etc.
-- screens/ — `investment_calculator/`, `loan_calculator/`, `retirement_calculator/`, `financial_calc_home.dart`
-- widgets/ — `financial_profile_dialog.dart`, `financial_health_card.dart`, `settings.dart`, `referral_rewards_card.dart`
-- utils/ — `calculator_card.dart`, `calculator_grid.dart`, helpers
+Key folders and files:
 
----
-
-## Core concepts
-
-1. UserDataService
-- Central service for: calculator usage tracking, profile persistence (monthly income, savings, debt, emergency fund), and income estimation fallbacks.
-- Use `widget.userDataService?.trackCalculatorUsage('calculator_name')` in calculators' `initState` to track usage.
-
-2. Financial Health Score
-- Calculated using `FinancialHealthScoreService` with inputs: income (profile or estimated), savings, investments, debts, emergency fund, and number of calculators used.
-- Calculators should pass `calculatorsUsed: widget.userDataService?.getTotalCalculatorsUsed() ?? 1` to the calculator helper methods.
-
-3. ReferralService
-- Generates and stores a referral code and counts referrals, unlocks rewards at milestones (1, 5, 10, 25).
+- `lib/main.dart` — app bootstrap and service providers.
+- `lib/services/` — core services: `user_data_service.dart`, `financial_health_service.dart`, `referral_service.dart`, `achievement_service.dart`.
+- `lib/screens/` — grouped calculators (investment, loan, retirement, home) and `financial_calc_home.dart`.
+- `lib/widgets/` — shared widgets: profile dialog, health card, referral UI, settings, etc.
+- `lib/utils/` — `calculator_card.dart`, `calculator_grid.dart` and helpers used by the home grid.
 
 ---
 
-## Calculators (status)
+## Core services (brief)
 
-- SIP (Systematic Investment Plan) — integrated with UserDataService and health score.
-- EMI (Loan) — integrated and uses EMI-based income estimation when profile missing.
-- FIRE / Retirement — integrated to use profile or estimate fallbacks.
-- Home Loan, Loan Prepayment, CAGR, Simple Interest — integrated (some added recently).
-- Remaining calculators (FD, RD, PPF, EPF, SSY, Compound Interest, Retirement Planning) may need tracking added (small edits).
+- UserDataService
+  - Persists user profile: monthly income, savings, debt, and emergency fund flag.
+  - Tracks calculator usage counts and total calculations performed.
+  - Provides `estimateMonthlyIncome()` fallback when profile is missing.
 
-See the "Action plan" section below for the exact per-file steps.
+- FinancialHealthService
+  - Computes a numeric score and category (e.g., Healthy, Needs Attention) using profile, debts, savings, and calculators used.
+  - Factory helpers available for calculator-specific scoring (SIP, EMI, loan prepayment, fixed investments).
+
+- ReferralService
+  - Generates a referral code, persists counts locally, and exposes reward milestones and unlocked rewards.
 
 ---
 
-## Action plan — how to add tracking to remaining calculators
+## How calculators use services
 
-For each calculator file:
+- Home grid (`lib/utils/calculator_grid.dart`) passes `UserDataService` and other services into calculator widgets.
+- Each calculator should accept `UserDataService? userDataService` and call `widget.userDataService?.trackCalculatorUsage('name')` in `initState`.
+- When computing health score, pass `calculatorsUsed: widget.userDataService?.getTotalCalculatorsUsed() ?? 1` to the `FinancialHealthService` helpers.
 
-1. Add import:
+Small code template to add to a calculator widget:
 
 ```dart
-import 'package:weqacalc/services/user_data_service.dart';
-```
-
-2. Accept the service in the widget:
-
-```dart
-class YourCalculator extends StatefulWidget {
+class ExampleCalc extends StatefulWidget {
   final UserDataService? userDataService;
-  const YourCalculator({super.key, this.userDataService});
+  const ExampleCalc({super.key, this.userDataService});
+}
+
+@override
+void initState() {
+  super.initState();
+  widget.userDataService?.trackCalculatorUsage('example_calc');
 }
 ```
 
-3. Track usage in `initState`:
+---
 
-```dart
-widget.userDataService?.trackCalculatorUsage('calculator_name');
-```
+## UI/Linting patterns and recent fixes
 
-4. Use dynamic calculator count when computing health score:
+- Avoid placing `Expanded` around a `GridView` inside an unbounded parent. Use `GridView.builder(shrinkWrap: true, physics: NeverScrollableScrollPhysics())` for grids inside scrolling columns.
+- Use `Text( ..., overflow: TextOverflow.ellipsis)` or wrap text in `Expanded` to prevent `Row` overflow.
+- Replace deprecated `Switch.activeColor` with `activeThumbColor` / `activeTrackColor` where applicable.
 
-```dart
-final calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
-```
-
-Also update `lib/utils/calculator_card.dart` to create instances that pass `userDataService` when navigating.
-
-Estimated time: ~5 minutes per calculator.
+These fixes were applied to `lib/widgets/achievement_badge.dart`, `lib/utils/calculator_grid.dart`, and `lib/widgets/financial_profile_dialog.dart`.
 
 ---
 
-## Testing checklist
+## Remaining small tasks (low effort)
 
-Manual tests to validate features:
-
-- Financial profile: Settings → Financial Profile → save values → verify calculators use real income.
-- Usage tracking: Settings → Calculator Usage Stats; open calculators and verify counts increment.
-- Referral system: Settings → Test Referral System → verify referral count and reward unlocks.
-- Persistence: Restart app and verify profile, usage, and referrals persist.
-- Static analysis: `dart analyze` should report no issues.
+- Add `UserDataService` tracking to these calculators if you want complete coverage: FD, RD, PPF, EPF, SSY, Compound Interest, Retirement Planning. Each is ~5 minutes.
 
 ---
 
-## Architecture & data flow (brief)
+## Testing & verification
 
-1. App starts and initializes services (`UserDataService`, `ReferralService`, `AchievementService`).
-2. Home screen is provided services via `MultiProvider` and passes them into calculators via `calculator_grid` / `calculator_card`.
-3. Calculator screens call `userDataService.trackCalculatorUsage()` in `initState` and use profile/estimate values for calculations.
-4. `FinancialHealthService` computes a score using persistent data and calculator context.
+Manual tests:
 
----
+- Save a financial profile (Settings → Financial Profile) and verify calculators use real income.
+- Open calculators and verify `UserDataService` counters increment (Settings or debug UI exposes counts).
+- Use referral UI to generate/share a code and mark referrals; verify reward unlocks.
 
-## Notable fixes & linting
+Static tests:
 
-- Deprecated Flutter property `activeColor` was addressed in UI where appropriate (use `activeThumbColor`/`activeTrackColor`).
-- Null-safety issues: ensure nullable services are invoked safely (e.g., `referralService?.getReferralCount() ?? 0` or assert non-null when safe).
-- Avoid `Expanded` inside unbounded parents — use `GridView` with `shrinkWrap: true` or wrap with constrained parent.
+- `dart analyze` — should return no issues on the active branch.
+
+Optional: run unit tests if present with `flutter test`.
 
 ---
 
 ## Contributing
 
-If you'd like to contribute:
-
-1. Fork and create feature branches.
-2. Add `UserDataService` tracking to calculators you update.
-3. Run `dart analyze` and ensure no issues.
-4. Open a PR with a short description and testing notes.
+- Follow standard GitHub workflow: branch, commit, PR.
+- Run `dart analyze` before opening PRs.
+- Keep UI behavior consistent with small device constraints (avoid unbounded `Expanded` usage).
 
 ---
 
 ## License
 
-See `LICENSE` at repo root.
+See the `LICENSE` file in the repository root.
 
 ---
 
-Generated: November 16, 2025
+Generated from project sources on November 16, 2025.
 
 *** End Patch
