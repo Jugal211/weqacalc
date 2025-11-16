@@ -4,11 +4,17 @@ import 'package:weqacalc/widgets/settings.dart';
 import 'package:weqacalc/utils/calculator_grid.dart';
 import 'package:weqacalc/models/calculator_item.dart';
 import 'package:weqacalc/services/referral_service.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 
 class FinancialCalculatorHome extends StatefulWidget {
   final ReferralService? referralService;
+  final UserDataService? userDataService;
 
-  const FinancialCalculatorHome({super.key, this.referralService});
+  const FinancialCalculatorHome({
+    super.key,
+    this.referralService,
+    this.userDataService,
+  });
 
   @override
   State<FinancialCalculatorHome> createState() =>
@@ -48,7 +54,10 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const SettingsBottomSheet(),
+      builder: (context) => SettingsBottomSheet(
+        userDataService: widget.userDataService,
+        referralService: widget.referralService,
+      ),
     );
   }
 
@@ -72,7 +81,11 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      buildCalculatorGrid(categories, _selectedIndex),
+                      buildCalculatorGrid(
+                      categories,
+                      _selectedIndex,
+                      userDataService: widget.userDataService,
+                    ),
                       if (widget.referralService != null)
                         Padding(
                           padding: const EdgeInsets.all(16),

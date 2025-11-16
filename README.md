@@ -1,137 +1,172 @@
-# WeFin Calculator - Your All-in-One Financial Calculator
+# WeFin Calculator (weqacalc)
 
-WeFin Calculator is a comprehensive Flutter-based financial calculator application designed to help users manage their finances effectively. It provides various calculators for investments, loans, and retirement planning, all within a user-friendly interface.
-
-## Table of Contents
-
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [To-Do](#to-do)
-- [Privacy Policy](#privacy-policy)
-
-## Features
-
-- **Investment Calculator**: Plan your investments with detailed calculations for returns, compound interest, and more.
-- **Loan Calculator**: Understand your loan repayments, interest, and amortization schedules.
-- **Retirement Calculator**: Estimate your retirement savings and plan for a secure future.
-- **User-Friendly Interface**: Clean and intuitive design for easy navigation and input.
-- **Cross-Platform**: Built with Flutter, supporting Android, iOS, Web, Windows, macOS, and Linux.
-
-## Screenshots
-
-<!-- Add screenshots of your application here. Example: -->
-
-| Home Screen | Investment Calculator | Loan Calculator | Retirement Calculator |
-|-------------|-----------------------|-----------------|-----------------------|
-| ![Home Screen](assets/screenshots/home_screen.png) | ![Investment Calculator](assets/screenshots/investment_calculator.png) | ![Loan Calculator](assets/screenshots/loan_calculator.png) | ![Retirement Calculator](assets/screenshots/retirement_calculator.png) |
-
-## Installation
-
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-
-Make sure you have Flutter installed. If not, follow the official Flutter installation guide: [Flutter Get Started](https://flutter.dev/docs/get-started/install)
-
-### Steps
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Jugal211/weqacalc.git
-    cd weqacalc
-    ```
-2.  **Get dependencies:**
-    ```bash
-    flutter pub get
-    ```
-3.  **Run the application:**
-    ```bash
-    flutter run
-    ```
-
-## Usage
-
--   Navigate through the different calculator sections using the bottom navigation bar or the app drawer.
--   Enter your financial details into the respective fields.
--   View instant calculations and results.
-
-## Project Structure
-
-```
-.
-├── lib/
-│   ├── main.dart             # Main entry point of the application
-│   ├── models/               # Data models for calculations
-│   │   └── calculator_item.dart
-│   ├── screens/              # UI for different calculator screens
-│   │   ├── coming_soon_screen.dart
-│   │   ├── financial_calc_home.dart
-│   │   ├── investment_calculator/
-│   │   │   ├── cagr_calc.dart
-│   │   │   ├── compound_interest_calc.dart
-│   │   │   ├── epf_calc.dart
-│   │   │   ├── fd_calc.dart
-│   │   │   ├── ppf_calc.dart
-│   │   │   ├── rd_calc.dart
-│   │   │   ├── simple_interest_calc.dart
-│   │   │   ├── sip_calc.dart
-│   │   │   └── ssy_calc.dart
-│   │   ├── loan_calculator/
-│   │   │   ├── emi_calc.dart
-│   │   │   ├── home_loan_calc.dart
-│   │   │   └── loan_prepay_calc.dart
-│   │   └── retirement_calculator/
-│   │       ├── fire_calc.dart
-│   │       └── retirement_calc.dart
-│   ├── utils/                # Utility functions and custom widgets
-│   │   ├── calculator_card.dart
-│   │   ├── calculator_grid.dart
-│   │   └── utils.dart
-│   └── widgets/              # Reusable widgets
-│       ├── about.dart
-│       └── settings.dart
-└── pubspec.yaml              # Project dependencies and metadata
-└── README.md                 # Project documentation
-└── PRIVACY_POLICY.md         # Privacy Policy document
-└── LICENSE                   # Project License
-```
-
-## Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## To-Do
-
-- [ ] Add more financial calculators (e.g., mortgage, savings)
-- [ ] Implement user accounts to save calculations
-- [ ] Add charts and graphs for better visualization
-- [ ] Improve UI/UX and add animations
-- [ ] Add localization for multiple languages
-
-## Privacy Policy
-
-We are committed to protecting your privacy. Please read our [Privacy Policy](privacy-policy.html) to understand how we handle your data.
+Smart, production-ready financial calculators with personalized Financial Health scoring, usage tracking, and a referral rewards system.
 
 ---
 
-Project Link: [https://github.com/Jugal211/weqacalc](https://github.com/Jugal211/weqacalc)
+## Quick summary
+- All hardcoded values removed — calculations use user profile or intelligent fallbacks.
+- Financial Health Score computed from real inputs and dynamic calculator-awareness.
+- Usage tracking for calculators (UserDataService) persisted with SharedPreferences.
+- Referral system with unique codes, local tracking, and reward milestones.
+- Code analysis-clean: `dart analyze` returns no issues in current branch.
 
+---
 
+## What's included in this repo
+- Multiple calculator screens (investment, loans, retirement).
+- Services: `UserDataService`, `ReferralService`, `FinancialHealthService`, `AchievementService`.
+- Widgets: financial profile dialog, health card, referral rewards UI, settings.
+- Utils: dynamic calculator routing and grid builders.
+- Full documentation consolidated into this README (previous top-level MD files were consolidated).
+
+---
+
+## Install & run (development)
+
+Prerequisites: Flutter SDK, Android/iOS tooling.
+
+1. Get dependencies:
+
+```bash
+flutter pub get
+```
+
+2. Run the app (connected device or emulator):
+
+```bash
+flutter run
+```
+
+3. Check static analysis:
+
+```bash
+dart analyze
+```
+
+---
+
+## Project structure (high-level)
+
+lib/
+- main.dart — app initialization and service providers
+- services/ — `user_data_service.dart`, `referral_service.dart`, `financial_health_service.dart`, etc.
+- screens/ — `investment_calculator/`, `loan_calculator/`, `retirement_calculator/`, `financial_calc_home.dart`
+- widgets/ — `financial_profile_dialog.dart`, `financial_health_card.dart`, `settings.dart`, `referral_rewards_card.dart`
+- utils/ — `calculator_card.dart`, `calculator_grid.dart`, helpers
+
+---
+
+## Core concepts
+
+1. UserDataService
+- Central service for: calculator usage tracking, profile persistence (monthly income, savings, debt, emergency fund), and income estimation fallbacks.
+- Use `widget.userDataService?.trackCalculatorUsage('calculator_name')` in calculators' `initState` to track usage.
+
+2. Financial Health Score
+- Calculated using `FinancialHealthScoreService` with inputs: income (profile or estimated), savings, investments, debts, emergency fund, and number of calculators used.
+- Calculators should pass `calculatorsUsed: widget.userDataService?.getTotalCalculatorsUsed() ?? 1` to the calculator helper methods.
+
+3. ReferralService
+- Generates and stores a referral code and counts referrals, unlocks rewards at milestones (1, 5, 10, 25).
+
+---
+
+## Calculators (status)
+
+- SIP (Systematic Investment Plan) — integrated with UserDataService and health score.
+- EMI (Loan) — integrated and uses EMI-based income estimation when profile missing.
+- FIRE / Retirement — integrated to use profile or estimate fallbacks.
+- Home Loan, Loan Prepayment, CAGR, Simple Interest — integrated (some added recently).
+- Remaining calculators (FD, RD, PPF, EPF, SSY, Compound Interest, Retirement Planning) may need tracking added (small edits).
+
+See the "Action plan" section below for the exact per-file steps.
+
+---
+
+## Action plan — how to add tracking to remaining calculators
+
+For each calculator file:
+
+1. Add import:
+
+```dart
+import 'package:weqacalc/services/user_data_service.dart';
+```
+
+2. Accept the service in the widget:
+
+```dart
+class YourCalculator extends StatefulWidget {
+  final UserDataService? userDataService;
+  const YourCalculator({super.key, this.userDataService});
+}
+```
+
+3. Track usage in `initState`:
+
+```dart
+widget.userDataService?.trackCalculatorUsage('calculator_name');
+```
+
+4. Use dynamic calculator count when computing health score:
+
+```dart
+final calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
+```
+
+Also update `lib/utils/calculator_card.dart` to create instances that pass `userDataService` when navigating.
+
+Estimated time: ~5 minutes per calculator.
+
+---
+
+## Testing checklist
+
+Manual tests to validate features:
+
+- Financial profile: Settings → Financial Profile → save values → verify calculators use real income.
+- Usage tracking: Settings → Calculator Usage Stats; open calculators and verify counts increment.
+- Referral system: Settings → Test Referral System → verify referral count and reward unlocks.
+- Persistence: Restart app and verify profile, usage, and referrals persist.
+- Static analysis: `dart analyze` should report no issues.
+
+---
+
+## Architecture & data flow (brief)
+
+1. App starts and initializes services (`UserDataService`, `ReferralService`, `AchievementService`).
+2. Home screen is provided services via `MultiProvider` and passes them into calculators via `calculator_grid` / `calculator_card`.
+3. Calculator screens call `userDataService.trackCalculatorUsage()` in `initState` and use profile/estimate values for calculations.
+4. `FinancialHealthService` computes a score using persistent data and calculator context.
+
+---
+
+## Notable fixes & linting
+
+- Deprecated Flutter property `activeColor` was addressed in UI where appropriate (use `activeThumbColor`/`activeTrackColor`).
+- Null-safety issues: ensure nullable services are invoked safely (e.g., `referralService?.getReferralCount() ?? 0` or assert non-null when safe).
+- Avoid `Expanded` inside unbounded parents — use `GridView` with `shrinkWrap: true` or wrap with constrained parent.
+
+---
+
+## Contributing
+
+If you'd like to contribute:
+
+1. Fork and create feature branches.
+2. Add `UserDataService` tracking to calculators you update.
+3. Run `dart analyze` and ensure no issues.
+4. Open a PR with a short description and testing notes.
+
+---
+
+## License
+
+See `LICENSE` at repo root.
+
+---
+
+Generated: November 16, 2025
+
+*** End Patch

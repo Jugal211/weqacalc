@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:weqacalc/services/user_data_service.dart';
 import 'package:weqacalc/services/financial_health_service.dart';
 import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class LoanPrepaymentCalculator extends StatefulWidget {
-  const LoanPrepaymentCalculator({super.key});
+  final UserDataService? userDataService;
+
+  const LoanPrepaymentCalculator({super.key, this.userDataService});
 
   @override
   State<LoanPrepaymentCalculator> createState() =>
@@ -48,6 +51,8 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
     _stepUpController.text = _stepUpPercentage.toStringAsFixed(1);
     _extraPaymentController.text = _extraPaymentPerYear.toStringAsFixed(0);
     _calculate();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('loan_prepayment');
   }
 
   void _calculate() {
@@ -55,14 +60,18 @@ class _LoanPrepaymentCalculatorState extends State<LoanPrepaymentCalculator> {
     _calculatePrepaymentLoan();
     _calculateSavings();
 
-    // Calculate health score - assuming 100000 monthly income
-    const estimatedMonthlyIncome = 100000.0;
+    // Calculate health score
+    final estimatedMonthlyIncome = widget.userDataService?.estimateMonthlyIncome(
+      monthlyEMI: _prepaymentEMI,
+    ) ?? _prepaymentEMI / 0.4;
+    
+    final calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
     _healthScore = FinancialHealthScoreService.calculateForLoanPrepayment(
       monthlyEMI: _prepaymentEMI,
       extraPayment: _extraPaymentPerYear / 12,
       loanAmount: _loanAmount,
       estimatedMonthlyIncome: estimatedMonthlyIncome,
-      calculatorsUsed: 1,
+      calculatorsUsed: calculatorsUsed,
     );
 
     setState(() {});

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
 import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class EMICalculator extends StatefulWidget {
-  const EMICalculator({super.key});
+  final UserDataService? userDataService;
+
+  const EMICalculator({super.key, this.userDataService});
 
   @override
   State<EMICalculator> createState() => _EMICalculatorState();
@@ -34,6 +37,8 @@ class _EMICalculatorState extends State<EMICalculator> {
     _interestRateController.text = _interestRate.toStringAsFixed(1);
     _loanTenureController.text = _loanTenure.toString();
     _calculateEMI();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('emi');
   }
 
   void _calculateEMI() {
@@ -54,14 +59,18 @@ class _EMICalculatorState extends State<EMICalculator> {
     _totalAmount = _monthlyEMI * months;
     _totalInterest = _totalAmount - principal;
 
-    // Calculate health score - assuming 50000 monthly income
-    const estimatedMonthlyIncome = 50000.0;
+    // Calculate health score - estimate income from EMI
+    final estimatedMonthlyIncome = widget.userDataService?.estimateMonthlyIncome(
+      monthlyEMI: _monthlyEMI,
+    ) ?? _monthlyEMI / 0.4; // Fallback: EMI should be max 40% of income
+    
+    final calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
     _healthScore = FinancialHealthScoreService.calculateForEMI(
       monthlyEMI: _monthlyEMI,
       loanAmount: _loanAmount,
       loanTenureYears: _loanTenure,
       estimatedMonthlyIncome: estimatedMonthlyIncome,
-      calculatorsUsed: 1,
+      calculatorsUsed: calculatorsUsed,
     );
 
     setState(() {});

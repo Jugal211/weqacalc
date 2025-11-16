@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
 import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class SIPCalculator extends StatefulWidget {
-  const SIPCalculator({super.key});
+  final UserDataService? userDataService;
+
+  const SIPCalculator({super.key, this.userDataService});
 
   @override
   State<SIPCalculator> createState() => _SIPCalculatorState();
@@ -37,6 +40,8 @@ class _SIPCalculatorState extends State<SIPCalculator> {
     _timePeriodController.text = _timePeriod.toString();
     _stepUpController.text = _stepUpPercentage.toStringAsFixed(1);
     _calculate();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('sip');
   }
 
   void _calculate() {
@@ -47,11 +52,12 @@ class _SIPCalculatorState extends State<SIPCalculator> {
     }
 
     // Calculate health score
+    final calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
     _healthScore = FinancialHealthScoreService.calculateForSIP(
       monthlyInvestment: _monthlyInvestment,
       timePeriodYears: _timePeriod,
       hasRegularInvesting: true,
-      calculatorsUsed: 1,
+      calculatorsUsed: calculatorsUsed,
     );
 
     setState(() {});

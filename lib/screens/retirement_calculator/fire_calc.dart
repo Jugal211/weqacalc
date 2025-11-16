@@ -3,12 +3,15 @@ import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:weqacalc/services/achievement_service.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 import 'package:weqacalc/widgets/achievement_badge.dart';
 import 'package:weqacalc/services/financial_health_service.dart';
 import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class FIRECalculator extends StatefulWidget {
-  const FIRECalculator({super.key});
+  final UserDataService? userDataService;
+
+  const FIRECalculator({super.key, this.userDataService});
 
   @override
   State<FIRECalculator> createState() => _FIRECalculatorState();
@@ -44,6 +47,8 @@ class _FIRECalculatorState extends State<FIRECalculator> {
     _inflationRateController.text = _inflationRate.toStringAsFixed(0);
     _coastFIREAgeController.text = _coastFIREAge.toString();
     _calculate();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('fire');
   }
 
   void _calculate() {
@@ -837,17 +842,20 @@ class _FIRECalculatorState extends State<FIRECalculator> {
   Widget _buildFinancialHealthCard() {
     // Calculate based on current inputs
     // For FIRE calculator, we estimate based on retirement corpus and goals
-    // Assume monthly income based on expense ratio
-    double estimatedMonthlyIncome =
-        _monthlyExpense * 3; // Conservative estimate
-    double estimatedMonthlySavings =
-        _monthlyExpense * 0.5; // Assume 50% savings
-    double estimatedInvestment = _traditionalFIRE > 0
-        ? 100000
-        : 0; // Has investment goal
-    double estimatedLoan = 0; // FIRE calculator doesn't track debt
-    bool hasEmergencyFund =
-        _monthlyExpense > 0; // Using calculator implies planning
+    double estimatedMonthlyIncome = widget.userDataService?.estimateMonthlyIncome(
+      monthlyExpenses: _monthlyExpense,
+    ) ?? _monthlyExpense * 2; // Fallback: 2x expenses
+    
+    double estimatedMonthlySavings = widget.userDataService?.getMonthlySavings() ?? 0;
+    if (estimatedMonthlySavings == 0 && estimatedMonthlyIncome > _monthlyExpense) {
+      // Estimate savings if not set
+      estimatedMonthlySavings = estimatedMonthlyIncome - _monthlyExpense;
+    }
+    
+    double estimatedInvestment = _traditionalFIRE > 0 ? 100000 : 0; // Has investment goal
+    double estimatedLoan = widget.userDataService?.getTotalDebt() ?? 0;
+    bool hasEmergencyFund = widget.userDataService?.getHasEmergencyFund() ?? false;
+    int calculatorsUsed = widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
 
     final healthScore = FinancialHealthScoreService.calculateScore(
       monthlyIncome: estimatedMonthlyIncome,
@@ -855,7 +863,7 @@ class _FIRECalculatorState extends State<FIRECalculator> {
       investmentAmount: estimatedInvestment,
       loanAmount: estimatedLoan,
       hasEmergencyFund: hasEmergencyFund,
-      calculatorsUsed: 1, // Using FIRE calculator
+      calculatorsUsed: calculatorsUsed,
     );
 
     return Column(

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:weqacalc/services/user_data_service.dart';
+import 'package:weqacalc/services/financial_health_service.dart';
+import 'package:weqacalc/widgets/financial_health_card.dart';
 
 class HomeLoanCalculator extends StatefulWidget {
-  const HomeLoanCalculator({super.key});
+  final UserDataService? userDataService;
+
+  const HomeLoanCalculator({super.key, this.userDataService});
 
   @override
   State<HomeLoanCalculator> createState() => _HomeLoanCalculatorState();
@@ -22,6 +27,9 @@ class _HomeLoanCalculatorState extends State<HomeLoanCalculator> {
   double _totalAmount = 0;
   double _totalInterest = 0;
 
+  // Financial health score
+  FinancialHealthScore? _healthScore;
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +37,8 @@ class _HomeLoanCalculatorState extends State<HomeLoanCalculator> {
     _interestRateController.text = _interestRate.toStringAsFixed(1);
     _loanTenureController.text = _loanTenure.toString();
     _calculateEMI();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('home_loan');
   }
 
   void _calculateEMI() {
@@ -48,6 +58,23 @@ class _HomeLoanCalculatorState extends State<HomeLoanCalculator> {
 
     _totalAmount = _monthlyEMI * months;
     _totalInterest = _totalAmount - principal;
+
+    // Calculate health score
+    final estimatedMonthlyIncome =
+        widget.userDataService?.estimateMonthlyIncome(
+          monthlyEMI: _monthlyEMI,
+        ) ??
+        _monthlyEMI / 0.4;
+
+    final calculatorsUsed =
+        widget.userDataService?.getTotalCalculatorsUsed() ?? 1;
+    _healthScore = FinancialHealthScoreService.calculateForEMI(
+      monthlyEMI: _monthlyEMI,
+      loanAmount: _loanAmount,
+      loanTenureYears: _loanTenure,
+      estimatedMonthlyIncome: estimatedMonthlyIncome,
+      calculatorsUsed: calculatorsUsed,
+    );
 
     setState(() {});
   }
@@ -128,6 +155,10 @@ class _HomeLoanCalculatorState extends State<HomeLoanCalculator> {
                   const SizedBox(height: 20),
                   _buildSummaryCards(),
                   const SizedBox(height: 20),
+                  if (_healthScore != null) ...[
+                    FinancialHealthScoreCard(score: _healthScore!),
+                    const SizedBox(height: 20),
+                  ],
                   _buildPieChart(),
                   const SizedBox(height: 20),
                   _buildPaymentBreakdownChart(),

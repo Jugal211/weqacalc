@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 
 class CAGRCalculator extends StatefulWidget {
-  const CAGRCalculator({super.key});
+  final UserDataService? userDataService;
+
+  const CAGRCalculator({super.key, this.userDataService});
 
   @override
   State<CAGRCalculator> createState() => _CAGRCalculatorState();
@@ -30,6 +33,8 @@ class _CAGRCalculatorState extends State<CAGRCalculator> {
     _currentValueController.text = _currentValue.toStringAsFixed(0);
     _durationController.text = _duration.toStringAsFixed(1);
     _calculate();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('cagr');
   }
 
   void _calculate() {

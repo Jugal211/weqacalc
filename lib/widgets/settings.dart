@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weqacalc/widgets/about.dart' as about;
+import 'package:weqacalc/widgets/financial_profile_dialog.dart';
+import 'package:weqacalc/services/user_data_service.dart';
+import 'package:weqacalc/services/referral_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 Widget buildSettingOption(
@@ -44,13 +47,123 @@ Widget buildSettingOption(
 }
 
 class SettingsBottomSheet extends StatelessWidget {
-  const SettingsBottomSheet({super.key});
+  final UserDataService? userDataService;
+  final ReferralService? referralService;
+
+  const SettingsBottomSheet({
+    super.key,
+    this.userDataService,
+    this.referralService,
+  });
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.inAppWebView)) {
       throw 'Could not launch $url';
     }
+  }
+
+  void _showUsageStats(BuildContext context, UserDataService userDataService) {
+    final usage = userDataService.getCalculatorUsage();
+    final totalUsed = userDataService.getTotalCalculatorsUsed();
+    final totalCalculations = userDataService.getTotalCalculations();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Calculator Usage Stats'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStatRow('Unique Calculators Used', totalUsed.toString()),
+              const SizedBox(height: 8),
+              _buildStatRow('Total Calculations', totalCalculations.toString()),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              const Text(
+                'Calculator Breakdown:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              if (usage.isEmpty)
+                const Text(
+                  'No calculators used yet',
+                  style: TextStyle(color: Colors.grey),
+                )
+              else
+                ...usage.entries.map((entry) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          entry.key.toUpperCase(),
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${entry.value}x',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.green.shade700,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -95,6 +208,51 @@ class SettingsBottomSheet extends StatelessWidget {
               ),
             ),
             SizedBox(height: 24),
+            if (userDataService != null)
+              buildSettingOption(
+                context,
+                'Financial Profile',
+                Icons.account_balance_wallet_rounded,
+                () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => FinancialProfileDialog(
+                      userDataService: userDataService!,
+                    ),
+                  );
+                },
+              ),
+            if (userDataService != null)
+              buildSettingOption(
+                context,
+                'Calculator Usage Stats',
+                Icons.bar_chart_rounded,
+                () {
+                  Navigator.pop(context);
+                  _showUsageStats(context, userDataService!);
+                },
+              ),
+            if (referralService != null)
+              buildSettingOption(
+                context,
+                'Test Referral System',
+                Icons.add_circle_outline_rounded,
+                () async {
+                  await referralService!.addReferral();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Referral added! Total: ${referralService!.getReferralCount()}',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+              ),
             buildSettingOption(
               context,
               'About',

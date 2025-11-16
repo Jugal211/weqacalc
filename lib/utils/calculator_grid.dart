@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weqacalc/models/calculator_item.dart';
 import 'package:weqacalc/utils/calculator_card.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 import '../screens/investment_calculator/sip_calc.dart';
 import '../screens/investment_calculator/cagr_calc.dart';
 import '../screens/investment_calculator/simple_interest_calc.dart';
@@ -150,8 +151,9 @@ List<CalculatorItem> getFilteredCalculators(
 
 Widget buildCalculatorGrid(
   List<CalculatorCategory> categories,
-  int selectedIndex,
-) {
+  int selectedIndex, {
+  UserDataService? userDataService,
+}) {
   final calculators = getFilteredCalculators(categories, selectedIndex);
 
   return AnimatedSwitcher(
@@ -187,7 +189,12 @@ Widget buildCalculatorGrid(
           ),
           itemCount: calculators.length,
           itemBuilder: (context, index) {
-            return buildCalculatorCard(context, calculators[index], index);
+            return buildCalculatorCard(
+              context,
+              calculators[index],
+              index,
+              userDataService: userDataService,
+            );
           },
         ),
       ],

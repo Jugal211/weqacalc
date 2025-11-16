@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:weqacalc/utils/utils.dart';
+import 'package:weqacalc/services/user_data_service.dart';
 
 class SimpleInterestCalculator extends StatefulWidget {
-  const SimpleInterestCalculator({super.key});
+  final UserDataService? userDataService;
+
+  const SimpleInterestCalculator({super.key, this.userDataService});
 
   @override
   State<SimpleInterestCalculator> createState() =>
@@ -29,6 +32,8 @@ class _SimpleInterestCalculatorState extends State<SimpleInterestCalculator> {
     _rateController.text = _rate.toStringAsFixed(1);
     _timeController.text = _time.toStringAsFixed(1);
     _calculate();
+    // Track calculator usage
+    widget.userDataService?.trackCalculatorUsage('simple_interest');
   }
 
   void _calculate() {

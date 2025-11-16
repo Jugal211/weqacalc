@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:weqacalc/models/calculator_item.dart';
+import 'package:weqacalc/services/user_data_service.dart';
+import 'package:weqacalc/screens/investment_calculator/sip_calc.dart';
+import 'package:weqacalc/screens/loan_calculator/emi_calc.dart';
+import 'package:weqacalc/screens/loan_calculator/home_loan_calc.dart';
+import 'package:weqacalc/screens/loan_calculator/loan_prepay_calc.dart';
+import 'package:weqacalc/screens/retirement_calculator/fire_calc.dart';
+import 'package:weqacalc/screens/investment_calculator/cagr_calc.dart';
 
 Widget buildCalculatorCard(
   BuildContext context,
   CalculatorItem item,
-  int index,
-) {
+  int index, {
+  UserDataService? userDataService,
+}) {
   return TweenAnimationBuilder<double>(
     duration: Duration(milliseconds: 400 + (index * 50)),
     tween: Tween(begin: 0.0, end: 1.0),
@@ -17,9 +25,26 @@ Widget buildCalculatorCard(
     },
     child: GestureDetector(
       onTap: () {
+        // Pass userDataService to calculator routes dynamically
+        Widget route = item.route;
+        if (route is SIPCalculator) {
+          route = SIPCalculator(userDataService: userDataService);
+        } else if (route is EMICalculator) {
+          route = EMICalculator(userDataService: userDataService);
+        } else if (route is FIRECalculator) {
+          route = FIRECalculator(userDataService: userDataService);
+        } else if (route is HomeLoanCalculator) {
+          route = HomeLoanCalculator(userDataService: userDataService);
+        } else if (route is LoanPrepaymentCalculator) {
+          route = LoanPrepaymentCalculator(userDataService: userDataService);
+        } else if (route is CAGRCalculator) {
+          route = CAGRCalculator(userDataService: userDataService);
+        }
+        // Other calculators will use default routes (no health score yet)
+        
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => item.route),
+          MaterialPageRoute(builder: (context) => route),
         );
       },
       child: Container(
