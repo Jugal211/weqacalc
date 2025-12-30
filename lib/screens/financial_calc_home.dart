@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:collection/collection.dart';
 import 'package:weqacalc/widgets/settings.dart';
 import 'package:weqacalc/utils/calculator_grid.dart';
@@ -82,10 +84,10 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
                   child: Column(
                     children: [
                       buildCalculatorGrid(
-                      categories,
-                      _selectedIndex,
-                      userDataService: widget.userDataService,
-                    ),
+                        categories,
+                        _selectedIndex,
+                        userDataService: widget.userDataService,
+                      ),
                       if (widget.referralService != null)
                         Padding(
                           padding: const EdgeInsets.all(16),
@@ -206,15 +208,19 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
                         ),
                         GestureDetector(
                           onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(text: referralCode),
+                            );
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Copied: $referralCode'),
-                                duration: const Duration(seconds: 2),
+                                duration: Duration(seconds: 2),
                               ),
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.purple.shade400,
                               borderRadius: BorderRadius.circular(6),
@@ -236,11 +242,16 @@ class _FinancialCalculatorHomeState extends State<FinancialCalculatorHome>
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    // Share functionality
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Share this code: $referralCode')),
-                    );
+                    final referralCode = widget.referralService!
+                        .getReferralCode();
+                    const appLink =
+                        "https://play.google.com/store/apps/details?id=com.wefin.calculator";
+                    final message =
+                        "Hey! Use my referral code **$referralCode** and unlock premium features on WeFin Calculator.\n\nDownload the app:\n$appLink";
+
+                    Share.share(message);
                   },
+
                   icon: const Icon(Icons.share),
                   label: const Text('Share Referral Code'),
                   style: ElevatedButton.styleFrom(
